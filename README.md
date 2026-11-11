@@ -1,0 +1,135 @@
+# SkyFare
+
+SkyFare is a flight-booking and executive-aviation platform. The repository
+keeps its Next.js frontend and FastAPI backend in separate applications.
+Design reference screenshots are preserved in [`skyfare/design-references/`](./skyfare/design-references/).
+
+## Phase 1 status
+
+This phase establishes the application foundations only. It does not include
+flight search, booking, authentication endpoints, payment processing, or
+production UI screens. No flight availability, prices, payment results, or
+tickets are synthesized.
+
+## Requirements
+
+- Node.js 20.9 or newer and npm
+- Python 3.11 or newer
+- PostgreSQL 14 or newer
+
+## Frontend
+
+```powershell
+cd frontend
+Copy-Item .env.example .env.local
+npm install
+npm run dev
+```
+
+Open <http://localhost:3000>. Other useful commands:
+
+```powershell
+npm run lint
+npm run typecheck
+npm run test:e2e
+```
+
+The typed API client reads `NEXT_PUBLIC_API_BASE_URL`; it must point to the
+backend's versioned API, for example `http://localhost:8000/api/v1`.
+
+### OpenAPI types
+
+Start the backend, then run this from `frontend/`:
+
+```powershell
+npm run api:types
+```
+
+This fetches FastAPI's `/openapi.json` and writes generated types under
+`src/lib/api/`. Set `SKYFARE_OPENAPI_URL` to use a different OpenAPI URL.
+Generated types are build outputs and should be regenerated when the API
+contract changes.
+
+## Backend
+
+Create and activate a virtual environment from `backend/`:
+
+```powershell
+cd backend
+py -3.13 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev]"
+Copy-Item .env.example .env
+```
+
+Set the values in `backend/.env` for your local PostgreSQL instance and replace
+the JWT placeholder with a random secret before implementing or enabling
+authentication. Generate a development secret with:
+
+```powershell
+python -c "import secrets; print(secrets.token_urlsafe(48))"
+```
+
+Apply migrations and start the API:
+
+```powershell
+alembic upgrade head
+uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+OpenAPI docs are at <http://localhost:8000/docs>. Liveness and readiness
+endpoints are `/api/v1/health` and `/api/v1/ready`.
+
+Run backend tests and lint:
+
+```powershell
+pytest
+ruff check .
+```
+
+## PostgreSQL configuration
+
+Create a database and a dedicated local role, then set `DATABASE_URL` in
+`backend/.env` using the `postgresql+psycopg` SQLAlchemy URL scheme:
+
+```text
+postgresql+psycopg://skyfare:YOUR_LOCAL_PASSWORD@localhost:5432/skyfare
+```
+
+For example, from `psql` as a PostgreSQL administrator:
+
+```sql
+CREATE ROLE skyfare WITH LOGIN PASSWORD 'choose-a-local-password';
+CREATE DATABASE skyfare OWNER skyfare;
+```
+
+The URL shown in `.env.example` is a placeholder for local setup, not a
+credential. Do not commit `.env` files, production credentials, signing keys,
+or provider secrets. The readiness check returns HTTP 503 when PostgreSQL is
+unavailable; liveness remains available so the application can report its
+process health independently.
+
+## Project structure
+
+```text
+frontend/                 Next.js App Router application
+  src/app/                Routes and root layout
+  src/components/         Shared UI and layout components
+  src/features/           Feature-specific frontend modules
+  src/lib/api/             REST client and generated OpenAPI types
+  src/schemas/             Client-side validation schemas
+  src/types/               Frontend types
+  tests/                  Playwright smoke tests
+backend/                  FastAPI application
+  app/api/v1/              Versioned REST routers
+  app/core/                Settings, logging and error handling
+  app/db/                  SQLAlchemy engine, session and declarative base
+  app/models/              SQLAlchemy models (added with domain phases)
+  app/repositories/        Persistence access layer
+  app/schemas/             Pydantic API contracts
+  app/services/            Business use cases
+  migrations/              Alembic configuration and revisions
+  tests/                   Pytest tests
+skyfare/design-references/ Preserved visual references
+```

@@ -1,0 +1,42 @@
+# Environment files
+.env
+.env.*
+!.env.example
+!.env.*.example
+/backend/.env
+/frontend/.env.local
+
+# Node.js / Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/coverage/
+frontend/test-results/
+frontend/playwright-report/
+frontend/*.tsbuildinfo
+frontend/next-env.d.ts
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Alembic and local databases
+backend/*.db
+
+# Local design and tool configuration
+/skyfare/design-references/
+/.mcp.json
+
+# Editors and operating systems
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
