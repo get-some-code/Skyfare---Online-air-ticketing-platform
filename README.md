@@ -4,12 +4,13 @@ SkyFare is a flight-booking and executive-aviation platform. The repository
 keeps its Next.js frontend and FastAPI backend in separate applications.
 Design reference screenshots are preserved in [`skyfare/design-references/`](./skyfare/design-references/).
 
-## Phase 1 status
+## Frontend implementation status
 
-This phase establishes the application foundations only. It does not include
-flight search, booking, authentication endpoints, payment processing, or
-production UI screens. No flight availability, prices, payment results, or
-tickets are synthesized.
+The shared responsive layout and homepage are implemented from the supplied
+design references. `/flights/search` is a criteria-only preview page: there is
+no live flight search, inventory, booking, authentication, payment processing,
+or ticketing. Example routes and fares are clearly marked development fixtures
+and are not live prices or availability.
 
 ## Requirements
 
@@ -115,8 +116,10 @@ process health independently.
 ```text
 frontend/                 Next.js App Router application
   src/app/                Routes and root layout
-  src/components/         Shared UI and layout components
-  src/features/           Feature-specific frontend modules
+    flights/search/       Non-live search criteria preview
+  src/components/site/    Shared navigation, footer and currency context
+  src/components/ui/      Reusable icons and preview dialogs
+  src/features/homepage/  Homepage sections and isolated fixtures
   src/lib/api/             REST client and generated OpenAPI types
   src/schemas/             Client-side validation schemas
   src/types/               Frontend types
