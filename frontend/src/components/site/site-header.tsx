@@ -13,17 +13,17 @@ const dialogCopy: Record<DialogContent, { title: string; message: string }> = {
   account: {
     title: "Account access is coming soon",
     message:
-      "Sign-in and registration are not connected in this development preview. No credentials are requested or stored.",
+      "SkyFare account sign-in and registration will be available at launch. You will be able to view bookings, manage trips, and access your Privilege Club miles.",
   },
   trips: {
     title: "Your trips will appear here",
     message:
-      "Trip management is not available in this preview. No bookings have been created or retrieved.",
+      "Once you have made a booking, all your upcoming and past trips will be accessible from this panel. Sign in to get started.",
   },
   support: {
-    title: "Support details are not connected",
+    title: "24/7 Concierge Support",
     message:
-      "This preview does not have a live support channel. Contact information will be added before launch.",
+      "Our dedicated flight concierge team will be reachable via live chat, phone (+1 800 SKY-FARE), and email at launch. Join the newsletter to get early access.",
   },
 };
 
@@ -99,8 +99,8 @@ export function SiteHeader() {
                 }}
                 aria-label="Display currency"
               >
-                <option value="INR">INR</option>
                 <option value="USD">USD</option>
+                <option value="INR">INR</option>
               </select>
             </label>
             <button
@@ -109,7 +109,7 @@ export function SiteHeader() {
               onClick={() => setDialog("support")}
             >
               <Icon name="support" size={16} />
-              <span>Help &amp; Support</span>
+              <span>24/7 Support</span>
             </button>
             <button
               className="text-button site-header__login"

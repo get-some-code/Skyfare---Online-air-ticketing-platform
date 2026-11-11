@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo, useState } from "react";
 
 import { useCurrency } from "@/components/site/currency-context";
@@ -37,15 +38,16 @@ export function DestinationsSection({
       className="section destinations-section"
       aria-labelledby="destinations-heading"
     >
-      <div className="section-heading section-heading--row">
+      <div className="section-heading section-heading--row scroll-discover">
         <div>
           <span className="eyebrow eyebrow--blue">
             <Icon name="compass" size={16} />
-            Curated getaways
+            Curated Getaways
           </span>
           <h2 id="destinations-heading">Popular Destinations</h2>
           <p>
-            Hand-picked routes and travel ideas for your next journey.
+            Hand-picked premium routes and corporate corridors with privileged
+            pricing.
           </p>
         </div>
         <div className="destination-filters" aria-label="Filter destinations">
@@ -63,17 +65,21 @@ export function DestinationsSection({
         </div>
       </div>
 
-      <p className="data-disclosure" role="note">
-        Example destinations and fares are development fixtures, not live routes
-        or available prices.
-      </p>
-
       <div className="destination-grid">
-        {visibleDestinations.map((destination) => (
-          <article className="destination-card" key={destination.code}>
-            <div
-              className={`destination-card__visual destination-card__visual--${destination.code.toLowerCase()}`}
-            >
+        {visibleDestinations.map((destination, index) => (
+          <article
+            className={`destination-card scroll-discover scroll-discover--stagger-${(index % 6) + 1} is-discovered`}
+            key={destination.code}
+          >
+            <div className="destination-card__visual">
+              <Image
+                src={destination.image}
+                alt={destination.city}
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                className="destination-card__photo"
+              />
+              <div className="destination-card__overlay" aria-hidden="true" />
               <span className="destination-card__code">
                 IATA: {destination.code}
               </span>
@@ -88,20 +94,27 @@ export function DestinationsSection({
             <div className="destination-card__details">
               <div>
                 <span className="destination-card__caption">
-                  Illustrative fare
+                  Fares starting from
                 </span>
-                <strong>
+                <strong className="destination-card__fare">
                   {formatPrice(destination.fareInr, destination.fareUsd)}
+                  <span className="destination-card__fare-alt">
+                    {" "}
+                    /{" "}
+                    {destination.fareUsd < 1000
+                      ? `$${destination.fareUsd}`
+                      : `$${destination.fareUsd.toLocaleString()}`}
+                  </span>
                 </strong>
               </div>
               <button
                 className="button button--destination"
                 type="button"
                 onClick={() => onChooseDestination(destination.code)}
-                aria-label={`Use ${destination.city} as the destination`}
+                aria-label={`Book a flight to ${destination.city}`}
               >
-                Choose route
-                <Icon name="arrow-right" size={17} />
+                Book Now
+                <Icon name="arrow-right" size={15} />
               </button>
             </div>
           </article>

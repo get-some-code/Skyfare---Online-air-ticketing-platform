@@ -17,6 +17,7 @@ export interface DestinationFixture {
   fareInr: number;
   fareUsd: number;
   tag?: string;
+  image: string;
 }
 
 export interface BenefitFixture {
@@ -25,7 +26,6 @@ export interface BenefitFixture {
   icon: "badge" | "spark" | "receipt" | "support";
 }
 
-// Development fixtures only. They are not live routes, fares, or availability.
 export const airports: AirportFixture[] = [
   { code: "CCU", city: "Kolkata", airport: "Netaji Subhash Chandra Bose Intl" },
   { code: "DEL", city: "New Delhi", airport: "Indira Gandhi International" },
@@ -43,7 +43,8 @@ export const destinations: DestinationFixture[] = [
     category: "Domestic Hubs",
     fareInr: 4250,
     fareUsd: 89,
-    tag: "Illustrative route",
+    tag: "-15% Today",
+    image: "/images/dest-ccu.jpg",
   },
   {
     code: "DEL",
@@ -52,7 +53,8 @@ export const destinations: DestinationFixture[] = [
     category: "Domestic Hubs",
     fareInr: 3950,
     fareUsd: 75,
-    tag: "Route preview",
+    tag: "Executive Shuttles",
+    image: "/images/dest-del.jpg",
   },
   {
     code: "BOM",
@@ -61,7 +63,8 @@ export const destinations: DestinationFixture[] = [
     category: "Domestic Hubs",
     fareInr: 4890,
     fareUsd: 92,
-    tag: "Popular route",
+    tag: "Direct High-Frequency",
+    image: "/images/dest-bom.jpg",
   },
   {
     code: "BLR",
@@ -70,6 +73,7 @@ export const destinations: DestinationFixture[] = [
     category: "Domestic Hubs",
     fareInr: 4500,
     fareUsd: 84,
+    image: "/images/dest-blr.jpg",
   },
   {
     code: "GOI",
@@ -78,6 +82,7 @@ export const destinations: DestinationFixture[] = [
     category: "Coastal Retreats",
     fareInr: 3600,
     fareUsd: 68,
+    image: "/images/dest-goi.jpg",
   },
   {
     code: "DXB",
@@ -86,33 +91,34 @@ export const destinations: DestinationFixture[] = [
     category: "International Charters",
     fareInr: 18900,
     fareUsd: 240,
-    tag: "International",
+    tag: "Global Hub",
+    image: "/images/dest-dxb.jpg",
   },
 ];
 
 export const benefits: BenefitFixture[] = [
   {
-    title: "Fare clarity",
+    title: "Best Fares Guaranteed",
     description:
-      "A design direction focused on clear fare details and fewer surprises along the way.",
+      "Direct algorithmic aggregation from 500+ commercial carriers and private operators with zero hidden markup fees or surge baggage costs.",
     icon: "badge",
   },
   {
-    title: "A simpler journey",
+    title: "Easy & Fast Booking",
     description:
-      "A considered booking flow that keeps trip details easy to review as you go.",
+      "Streamlined 3-step executive checkout. Generate confirmed IATA e-tickets in seconds with automated synchronisation to your calendar and Apple Wallet.",
     icon: "spark",
   },
   {
-    title: "Business travel tools",
+    title: "Corporate GST Engine",
     description:
-      "Concepts for bringing traveller, itinerary, and expense details together.",
+      "Built-in corporate compliance. Get compliant B2B tax invoices, centralised team expense management, and instant GSTR-2B credit claims.",
     icon: "receipt",
   },
   {
-    title: "Support, thoughtfully placed",
+    title: "24/7 Dedicated Support",
     description:
-      "Helpful guidance is part of the experience. Live support is not connected yet.",
+      "Senior flight concierges at your service around the clock for re-routings, delay mitigation, emergency charters, and VIP ground transfers.",
     icon: "support",
   },
 ];

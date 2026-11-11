@@ -46,7 +46,10 @@ export function PreviewDialog({
         >
           <Icon name="x" />
         </button>
-        <span className="eyebrow eyebrow--blue">SkyFare preview</span>
+        <span className="eyebrow eyebrow--blue">
+          <Icon name="plane" size={13} />
+          SkyFare
+        </span>
         <h2 id="preview-dialog-title">{title}</h2>
         <p>{message}</p>
         <button type="button" className="button button--primary" onClick={onClose}>

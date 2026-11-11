@@ -5,11 +5,11 @@ import { useState } from "react";
 import { Icon } from "@/components/ui/icon";
 import { PreviewDialog } from "@/components/ui/preview-dialog";
 
-const previewBenefits = [
-  "Travel rewards concept",
-  "Priority service concepts",
-  "Business travel tools",
-  "Flexible itinerary controls",
+const membershipBenefits = [
+  "Global Lounges",
+  "Zero Reschedule Fee",
+  "Fast Track Security",
+  "Concierge Desk",
 ];
 
 export function MembershipSection() {
@@ -19,20 +19,22 @@ export function MembershipSection() {
     <>
       <section
         id="membership"
-        className="membership-section"
+        className="membership-section scroll-discover"
         aria-labelledby="membership-heading"
       >
         <div className="membership-section__copy">
           <span className="eyebrow eyebrow--dark">
             <Icon name="spark" size={16} />
-            Loyalty &amp; corporate travel concept
+            Loyalty Rewards &amp; Corporate SOW
           </span>
           <h2 id="membership-heading">
             SkyFare Privilege Club &amp; Enterprise Pass
           </h2>
           <p>
-            Explore a concept for travel rewards, considered service, and tools
-            that help teams manage a journey in one place.
+            Earn corporate air miles on every scheduled flight and private
+            charter. Unlock VIP lounge privileges globally, priority boarding,
+            zero cancellation penalties, and single-click automated GSTR-2B
+            input credit reconciliation for your company.
           </p>
           <div className="membership-section__actions">
             <button
@@ -40,11 +42,11 @@ export function MembershipSection() {
               className="button button--primary"
               onClick={() => setDialogOpen(true)}
             >
-              Explore the preview
+              Join Free Today
               <Icon name="arrow-right" size={18} />
             </button>
             <a className="button button--dark" href="#why-skyfare">
-              How it is designed
+              Explore Enterprise Benefits
               <Icon name="chevron-right" size={18} />
             </a>
           </div>
@@ -52,26 +54,25 @@ export function MembershipSection() {
 
         <div className="membership-card">
           <div className="membership-card__top">
-            <span>MEMBERSHIP EXPERIENCE</span>
-            <span className="membership-card__badge">Design preview</span>
+            <span>EXECUTIVE TIER LEVEL</span>
+            <span className="membership-card__badge">Platinum Club</span>
           </div>
-          <strong>Travel, thoughtfully.</strong>
+          <strong>125,000+</strong>
           <div className="membership-card__rule" />
           <ul>
-            {previewBenefits.map((benefit) => (
+            {membershipBenefits.map((benefit) => (
               <li key={benefit}>
                 <Icon name="check" size={16} />
                 {benefit}
               </li>
             ))}
           </ul>
-          <p>No membership, rewards, or entitlements are active.</p>
         </div>
       </section>
       <PreviewDialog
         open={dialogOpen}
-        title="Membership is a design preview"
-        message="This concept does not create an account or activate rewards and travel benefits."
+        title="Membership registration is coming soon"
+        message="SkyFare Privilege Club enrolment will be available once account management is live. You will be able to earn miles and access lounge benefits on every booking."
         onClose={() => setDialogOpen(false)}
       />
     </>

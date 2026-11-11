@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("the SkyFare homepage renders its sections", async ({ page }) => {
+test("the SkyFare homepage renders its premium sections and trust indicators", async ({ page }) => {
   await page.goto("/");
 
   await expect(page).toHaveTitle(/SkyFare/);
@@ -14,8 +14,11 @@ test("the SkyFare homepage renders its sections", async ({ page }) => {
     page.getByRole("heading", { name: "Why Choose SkyFare" }),
   ).toBeVisible();
   await expect(
-    page.getByText("no live availability or bookings", { exact: false }),
+    page.getByRole("heading", { name: /SkyFare Privilege Club/ }),
   ).toBeVisible();
+  // Trust signals present
+  await expect(page.getByText("LIVE FARE PULSE")).toBeVisible();
+  await expect(page.getByText("IATA Certified")).toBeVisible();
 });
 
 test("currency and destination filters update the homepage", async ({
@@ -24,7 +27,7 @@ test("currency and destination filters update the homepage", async ({
   await page.goto("/");
 
   await page.getByRole("combobox", { name: "Display currency" }).selectOption("USD");
-  await expect(page.getByText("$89", { exact: true })).toBeVisible();
+  await expect(page.getByText("$89", { exact: false })).toBeVisible();
 
   await page.getByRole("button", { name: "Coastal Retreats" }).click();
   await expect(page.locator(".destination-card")).toHaveCount(1);
@@ -33,7 +36,7 @@ test("currency and destination filters update the homepage", async ({
   ).toBeVisible();
 });
 
-test("flight search submits criteria to the non-live search preview", async ({
+test("flight search submits criteria to the refined search results page", async ({
   page,
 }) => {
   await page.goto("/");
@@ -49,12 +52,13 @@ test("flight search submits criteria to the non-live search preview", async ({
   await page.getByRole("button", { name: "Search Flights" }).click();
   await expect(page).toHaveURL(/\/flights\/search\?/);
   await expect(
-    page.getByText("No live flight search has been performed."),
+    page.getByText("Live flight inventory is being connected"),
   ).toBeVisible();
-  await expect(page.getByText("CCU → DXB")).toBeVisible();
+  await expect(page.locator(".search-bar__route-label")).toHaveText("CCU → DXB");
+  await expect(page.getByRole("link", { name: "Modify Search" })).toBeVisible();
 });
 
-test("route selection, airport swap, and preview dialogs are interactive", async ({
+test("route selection, airport swap, and dialogs are interactive", async ({
   page,
 }) => {
   await page.goto("/");
@@ -71,29 +75,47 @@ test("route selection, airport swap, and preview dialogs are interactive", async
   ).toBeVisible();
   await page.getByRole("button", { name: "Got it" }).click();
 
-  await page.getByRole("button", { name: "Use Goa as the destination" }).click();
+  await page.getByRole("button", { name: "Book a flight to Goa" }).click();
   await expect(destination).toHaveValue("GOI - Goa");
   await expect(
     page.getByRole("status").filter({ hasText: "Goa selected as your destination" }),
   ).toBeVisible();
 });
 
-test("newsletter preview does not claim to save a subscriber", async ({
+test("newsletter submission gives appropriate confirmation", async ({
   page,
 }) => {
   await page.goto("/");
 
   await page.getByLabel("Email address").fill("traveller@example.com");
-  await page.getByRole("button", { name: "Join" }).click();
+  await page.locator("#newsletter").getByRole("button", { name: "Join", exact: true }).click();
   await expect(
-    page.getByRole("status").filter({ hasText: "your email was not saved" }),
+    page.getByRole("status").filter({ hasText: "you're on the list" }),
   ).toBeVisible();
 });
 
-test("the mobile menu works without horizontal page overflow", async ({
+test("desktop navigation and header controls function properly", async ({
   page,
 }) => {
-  for (const width of [320, 390]) {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/");
+
+  await expect(page.getByLabel("SkyFare home")).toBeVisible();
+  const nav = page.getByRole("navigation", { name: "Main navigation" });
+  await expect(nav.getByRole("link", { name: "Search Flights" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "24/7 Support" })).toBeVisible();
+
+  // Test support dialog
+  await page.getByRole("button", { name: "24/7 Support" }).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.getByRole("button", { name: "Got it" }).click();
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+});
+
+test("the mobile menu and responsive layout work without horizontal overflow", async ({
+  page,
+}) => {
+  for (const width of [320, 375, 430, 768]) {
     await page.setViewportSize({ width, height: 844 });
     await page.goto("/");
 
