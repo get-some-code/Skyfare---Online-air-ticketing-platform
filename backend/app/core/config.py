@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     )
     cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
     jwt_secret_key: SecretStr | None = None
-    jwt_access_token_minutes: int = 15
+    jwt_access_token_minutes: int = 1440
     jwt_refresh_token_days: int = 30
     aviationstack_api_key: SecretStr | None = None
     aviationstack_base_url: str = "https://api.aviationstack.com"

@@ -15,7 +15,13 @@ import {
   logoutApi,
   registerApi,
 } from "@/lib/api/auth";
-import { getStoredAccessToken } from "@/lib/api/client";
+import {
+  clearStoredSession,
+  getStoredAccessToken,
+  getStoredRefreshToken,
+  getStoredUser,
+  setStoredUser,
+} from "@/lib/api/client";
 import type {
   LoginPayload,
   RegisterPayload,
@@ -40,48 +46,57 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<UserPublic | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // Optimistically restore session from localStorage for seamless persistence
+  const [user, setUser] = useState<UserPublic | null>(() => getStoredUser<UserPublic>());
+  const [isLoading] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalTab, setAuthModalTab] = useState<"login" | "register">("login");
 
   const refreshUser = useCallback(async () => {
-    const token = getStoredAccessToken();
+    const token = getStoredAccessToken() || getStoredRefreshToken();
     if (!token) {
       setUser(null);
-      setIsLoading(false);
+      setStoredUser(null);
       return;
     }
     try {
       const current = await getMeApi();
       setUser(current);
+      setStoredUser(current);
     } catch {
       setUser(null);
-    } finally {
-      setIsLoading(false);
+      clearStoredSession();
     }
   }, []);
 
+  // Listen for session expiry event from API client
+  useEffect(() => {
+    function handleSessionExpired() {
+      setUser(null);
+      setStoredUser(null);
+    }
+    window.addEventListener("skyfare:auth:session_expired", handleSessionExpired);
+    return () => window.removeEventListener("skyfare:auth:session_expired", handleSessionExpired);
+  }, []);
+
+  // Validate and sync session in background on mount
   useEffect(() => {
     let ignore = false;
-    const token = getStoredAccessToken();
+    const token = getStoredAccessToken() || getStoredRefreshToken();
     if (!token) {
-      queueMicrotask(() => {
-        if (!ignore) setIsLoading(false);
-      });
       return;
     }
     getMeApi()
       .then((current) => {
         if (!ignore) {
           setUser(current);
-          setIsLoading(false);
+          setStoredUser(current);
         }
       })
       .catch(() => {
-        if (!ignore) {
+        if (!ignore && !getStoredRefreshToken()) {
           setUser(null);
-          setIsLoading(false);
+          setStoredUser(null);
         }
       });
     return () => {
@@ -102,6 +117,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async (payload: LoginPayload) => {
       const res = await loginApi(payload);
       setUser(res.user);
+      setStoredUser(res.user);
       setAuthModalOpen(false);
     },
     [],
@@ -111,6 +127,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async (payload: RegisterPayload) => {
       const res = await registerApi(payload);
       setUser(res.user);
+      setStoredUser(res.user);
       setAuthModalOpen(false);
     },
     [],
@@ -119,11 +136,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(async () => {
     await logoutApi();
     setUser(null);
+    setStoredUser(null);
   }, []);
 
   const joinPrivilegeClub = useCallback(async () => {
     const membership = await joinMembershipApi();
-    setUser((prev) => (prev ? { ...prev, membership } : null));
+    setUser((prev) => {
+      const updated = prev ? { ...prev, membership } : null;
+      setStoredUser(updated);
+      return updated;
+    });
   }, []);
 
   return (

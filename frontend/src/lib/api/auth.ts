@@ -1,7 +1,9 @@
 import {
   apiRequest,
+  clearStoredSession,
   getStoredRefreshToken,
   setStoredTokens,
+  setStoredUser,
 } from "./client";
 import type {
   AuthResponse,
@@ -18,6 +20,7 @@ export async function loginApi(payload: LoginPayload): Promise<AuthResponse> {
     body: JSON.stringify(payload),
   });
   setStoredTokens(data.tokens.access_token, data.tokens.refresh_token);
+  setStoredUser(data.user);
   return data;
 }
 
@@ -27,6 +30,7 @@ export async function registerApi(payload: RegisterPayload): Promise<AuthRespons
     body: JSON.stringify(payload),
   });
   setStoredTokens(data.tokens.access_token, data.tokens.refresh_token);
+  setStoredUser(data.user);
   return data;
 }
 
@@ -42,7 +46,23 @@ export async function logoutApi(): Promise<void> {
       // Ignore network errors on logout
     }
   }
-  setStoredTokens(null, null);
+  clearStoredSession();
+}
+
+export async function refreshTokenApi(
+  refreshToken: string,
+): Promise<{ access_token: string; refresh_token: string; expires_in: number }> {
+  const data = await apiRequest<{
+    access_token: string;
+    refresh_token: string;
+    token_type: string;
+    expires_in: number;
+  }>("auth/refresh", {
+    method: "POST",
+    body: JSON.stringify({ refresh_token: refreshToken }),
+  });
+  setStoredTokens(data.access_token, data.refresh_token);
+  return data;
 }
 
 export async function getMeApi(): Promise<UserPublic> {
