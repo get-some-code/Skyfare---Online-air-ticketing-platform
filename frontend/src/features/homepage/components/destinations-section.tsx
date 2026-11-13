@@ -39,7 +39,7 @@ export function DestinationsSection({
       aria-labelledby="destinations-heading"
     >
       <div className="section-heading section-heading--row scroll-discover">
-        <div>
+        <div className="section-heading__copy">
           <span className="eyebrow eyebrow--blue">
             <Icon name="compass" size={16} />
             Curated Getaways

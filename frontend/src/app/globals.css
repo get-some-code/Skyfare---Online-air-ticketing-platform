@@ -393,7 +393,7 @@ select:focus-visible {
 .hero-section {
   position: relative;
   overflow: hidden;
-  padding: 40px max(28px, calc((100% - var(--content-width)) / 2)) 74px;
+  padding: 36px max(28px, calc((100% - var(--content-width)) / 2)) 44px;
   background:
     radial-gradient(ellipse at 50% 30%, rgb(255 255 255 / 54%), transparent 58%),
     linear-gradient(180deg, #edf4ff 0%, #f5f8fe 90%);
@@ -478,7 +478,7 @@ select:focus-visible {
   flex-wrap: wrap;
   justify-content: center;
   gap: 12px;
-  margin: 34px 0 42px;
+  margin: 22px 0 28px;
 }
 
 .hero-points span {
@@ -505,7 +505,7 @@ select:focus-visible {
   position: relative;
   width: min(100%, 1160px);
   height: clamp(230px, 32vw, 380px);
-  margin: 0 auto 34px;
+  margin: 0 auto 28px;
   border-radius: 24px;
   overflow: hidden;
   box-shadow: 0 20px 50px rgb(0 21 42 / 16%);
@@ -682,7 +682,7 @@ select:focus-visible {
 /* ─── Real-Time Promotional & Bank Offers Section ─── */
 .offers-section {
   width: min(100% - 56px, var(--content-width));
-  margin: 50px auto 60px;
+  margin: 44px auto 48px;
 }
 
 .offers-section__header {
@@ -1380,31 +1380,41 @@ select:focus-visible {
 }
 
 .destinations-section {
-  padding-top: 32px;
-  padding-bottom: 70px;
+  padding-top: 48px;
+  padding-bottom: 56px;
+}
+
+.section-heading__copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
 }
 
 .section-heading h2 {
-  margin: 11px 0 2px;
+  margin: 0;
   color: var(--ink);
-  font-size: clamp(30px, 3.2vw, 43px);
+  font-size: clamp(28px, 3.2vw, 40px);
   font-weight: 700;
-  letter-spacing: -0.055em;
+  letter-spacing: -0.045em;
   line-height: 1.18;
 }
 
 .section-heading > p,
-.section-heading > div > p {
-  margin: 4px 0 0;
+.section-heading > div > p,
+.section-heading__copy > p {
+  margin: 0;
   color: #535b65;
-  font-size: 16px;
+  font-size: 15px;
+  line-height: 1.5;
 }
 
 .section-heading--row {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 25px;
+  gap: 24px;
+  margin-bottom: 28px;
 }
 
 .eyebrow {
@@ -1493,9 +1503,9 @@ select:focus-visible {
 .destination-card__visual {
   position: relative;
   display: flex;
-  min-height: 284px;
+  min-height: clamp(210px, 18vw, 250px);
   align-items: flex-end;
-  padding: 18px;
+  padding: 16px;
   color: white;
   overflow: hidden;
   background: #102a43;
@@ -1575,11 +1585,11 @@ select:focus-visible {
 
 .destination-card__details {
   display: flex;
-  min-height: 91px;
+  min-height: 80px;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 14px 17px;
+  padding: 12px 18px;
 }
 
 .destination-card__details > div {
@@ -1627,8 +1637,8 @@ select:focus-visible {
 }
 
 .benefits-section {
-  padding-top: 36px;
-  padding-bottom: 78px;
+  padding-top: 48px;
+  padding-bottom: 56px;
 }
 
 .section-heading--center {
@@ -1642,8 +1652,8 @@ select:focus-visible {
 .benefit-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 22px;
-  margin-top: 42px;
+  gap: 20px;
+  margin-top: 30px;
 }
 
 .benefit-card {
@@ -1695,12 +1705,12 @@ select:focus-visible {
   justify-content: space-between;
   gap: 48px;
   overflow: hidden;
-  margin: 0 auto 72px;
+  margin: 0 auto 56px;
   border-radius: 24px;
   background:
     radial-gradient(circle at 97% 5%, rgb(46 91 135 / 35%), transparent 32%),
     linear-gradient(115deg, #102a43 0%, #102a43 56%, #153751 100%);
-  padding: clamp(30px, 5vw, 62px);
+  padding: clamp(32px, 5vw, 54px);
   box-shadow: 0 16px 32px rgb(0 21 42 / 14%);
   color: white;
 }
