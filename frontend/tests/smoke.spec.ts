@@ -101,9 +101,20 @@ test("desktop navigation and header controls function properly", async ({
   await page.goto("/");
 
   await expect(page.getByLabel("SkyFare home")).toBeVisible();
+  // Ensure 3-bars hamburger toggle is strictly NOT visible on desktop
+  await expect(page.locator(".site-header__menu-toggle")).not.toBeVisible();
+
   const nav = page.getByRole("navigation", { name: "Main navigation" });
   await expect(nav.getByRole("link", { name: "Search Flights" })).toBeVisible();
   await expect(page.getByRole("button", { name: "24/7 Support" })).toBeVisible();
+
+  // Test bookings dialog centering with backdrop overlay
+  await nav.getByRole("button", { name: "My Bookings" }).click();
+  const bookingsModal = page.getByRole("dialog", { name: "Your trips will appear here" });
+  await expect(bookingsModal).toBeVisible();
+  await expect(page.locator(".auth-overlay")).toBeVisible();
+  await page.getByRole("button", { name: "Got it" }).click();
+  await expect(bookingsModal).not.toBeVisible();
 
   // Test support dialog
   await page.getByRole("button", { name: "24/7 Support" }).click();

@@ -18,6 +18,7 @@ export function SiteHeader() {
   const [dialog, setDialog] = useState<DialogContent | null>(null);
   const [bookingsOpen, setBookingsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   function closeMenu() {
@@ -26,17 +27,28 @@ export function SiteHeader() {
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+      if (headerRef.current && !headerRef.current.contains(e.target as Node)) {
+        setMobileMenuOpen(false);
+        setUserMenuOpen(false);
+      }
+    }
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setMobileMenuOpen(false);
         setUserMenuOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, []);
 
   return (
     <>
-      <header id="top" className="site-header">
+      <header id="top" className="site-header" ref={headerRef}>
         <div className="site-header__inner">
           <Link
             href="/"
@@ -81,6 +93,31 @@ export function SiteHeader() {
             <Link href="/#why-skyfare" onClick={closeMenu}>
               About Us
             </Link>
+
+            <div className="site-header__nav-mobile-extras">
+              <button
+                type="button"
+                onClick={() => {
+                  closeMenu();
+                  setDialog("support");
+                }}
+              >
+                <Icon name="support" size={16} />
+                <span>24/7 Support</span>
+              </button>
+              {!isAuthenticated && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeMenu();
+                    openAuthModal("login");
+                  }}
+                >
+                  <Icon name="spark" size={16} />
+                  <span>Sign In</span>
+                </button>
+              )}
+            </div>
           </nav>
 
           <div className="site-header__actions">

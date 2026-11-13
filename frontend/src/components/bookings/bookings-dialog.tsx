@@ -19,6 +19,16 @@ export function BookingsDialog({ open, onClose }: BookingsDialogProps) {
   const [cancellingRef, setCancellingRef] = useState<string | null>(null);
 
   useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape" && open) {
+        onClose();
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open, onClose]);
+
+  useEffect(() => {
     if (!open || !isAuthenticated) {
       return;
     }
@@ -58,19 +68,23 @@ export function BookingsDialog({ open, onClose }: BookingsDialogProps) {
 
   return (
     <div
-      className="preview-dialog"
+      className="auth-overlay"
       role="dialog"
       aria-modal="true"
       aria-labelledby="bookings-dialog-title"
+      onClick={onClose}
     >
-      <div className="preview-dialog__content bookings-dialog__content">
+      <div
+        className="auth-modal bookings-dialog-modal"
+        onClick={(e) => e.stopPropagation()}
+      >
         <button
           type="button"
-          className="icon-button preview-dialog__close"
+          className="auth-modal__close"
           onClick={onClose}
           aria-label="Close dialog"
         >
-          <Icon name="x" size={17} />
+          <Icon name="x" size={18} />
         </button>
 
         <span className="eyebrow eyebrow--blue">
@@ -78,11 +92,13 @@ export function BookingsDialog({ open, onClose }: BookingsDialogProps) {
           SkyFare Trips
         </span>
 
-        <h2 id="bookings-dialog-title">Your trips will appear here</h2>
+        <h2 id="bookings-dialog-title" className="bookings-dialog__title">
+          Your trips will appear here
+        </h2>
 
         {!isAuthenticated ? (
           <div>
-            <p>
+            <p className="bookings-dialog__desc">
               Once you have made a booking, all your upcoming and past trips will
               be accessible from this panel. Sign in to get started.
             </p>
@@ -106,7 +122,7 @@ export function BookingsDialog({ open, onClose }: BookingsDialogProps) {
           <p className="bookings-dialog__loading">Loading your executive reservations…</p>
         ) : bookings.length === 0 ? (
           <div>
-            <p>
+            <p className="bookings-dialog__desc">
               No active reservations found for your account. Use the search bar to
               find executive flights and commercial charter routes.
             </p>

@@ -151,6 +151,10 @@ select:focus-visible {
   gap: clamp(18px, 2.5vw, 42px);
 }
 
+.site-header__nav-mobile-extras {
+  display: none;
+}
+
 .site-header__nav a,
 .site-header__nav button,
 .text-button {
@@ -278,7 +282,7 @@ select:focus-visible {
 }
 
 .site-header__menu-toggle {
-  display: none;
+  display: none !important;
 }
 
 .icon-button {
@@ -1596,6 +1600,8 @@ select:focus-visible {
   padding: 0;
   color: var(--ink);
   box-shadow: 0 24px 80px rgb(0 21 42 / 25%);
+  inset: 0;
+  margin: auto;
 }
 
 .preview-dialog::backdrop {
@@ -2139,7 +2145,7 @@ select:focus-visible {
   }
 
   .site-header__menu-toggle {
-    display: inline-grid;
+    display: inline-grid !important;
     order: 3;
   }
 
@@ -2167,6 +2173,23 @@ select:focus-visible {
     min-height: 44px;
     padding-inline: 4px;
     text-align: left;
+  }
+
+  .site-header__nav-mobile-extras {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border-top: 1px solid var(--line);
+    margin-top: 8px;
+    padding-top: 8px;
+  }
+
+  .site-header__nav-mobile-extras button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--blue);
+    font-weight: 600;
   }
 
   .site-header__actions {
@@ -3125,6 +3148,25 @@ select:focus-visible {
 }
 
 /* ─── Bookings Dialog & Booking Flow ─── */
+.bookings-dialog-modal {
+  max-width: 580px;
+}
+
+.bookings-dialog__title {
+  margin: 14px 36px 8px 0;
+  font-size: 24px;
+  letter-spacing: -0.03em;
+  line-height: 1.25;
+  color: var(--ink);
+}
+
+.bookings-dialog__desc {
+  margin: 0 0 20px;
+  color: #596574;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
 .bookings-dialog__content {
   max-width: 580px;
 }
