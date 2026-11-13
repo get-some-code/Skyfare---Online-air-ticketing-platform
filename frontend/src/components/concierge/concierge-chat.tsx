@@ -25,6 +25,7 @@ const QUICK_PROMPTS = [
 
 export function ConciergeChat() {
   const [isOpen, setIsOpen] = useState(false);
+  const [showTeaser, setShowTeaser] = useState(true);
   const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_MESSAGES);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -81,12 +82,42 @@ export function ConciergeChat() {
 
   return (
     <div className="concierge-widget" aria-label="SkyFare AI Concierge">
+      {/* Floating Teaser Bubble */}
+      {!isOpen && showTeaser && (
+        <div className="concierge-teaser" role="status">
+          <div
+            className="concierge-teaser__content"
+            onClick={() => {
+              setIsOpen(true);
+              setShowTeaser(false);
+            }}
+          >
+            <span className="concierge-teaser__badge">24/7 AI Concierge</span>
+            <p>Traveling soon? Ask me about flights, baggage, lounges, or corporate GST!</p>
+          </div>
+          <button
+            type="button"
+            className="concierge-teaser__close"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowTeaser(false);
+            }}
+            aria-label="Dismiss message"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Floating Trigger Pill */}
       {!isOpen && (
         <button
           type="button"
           className="concierge-trigger"
-          onClick={() => setIsOpen(true)}
+          onClick={() => {
+            setIsOpen(true);
+            setShowTeaser(false);
+          }}
           aria-expanded={isOpen}
           aria-label="Open SkyFare AI Concierge chat"
         >
