@@ -130,6 +130,7 @@ export function OffersSection() {
 
   return (
     <section
+      id="offers"
       className="offers-section scroll-discover"
       aria-labelledby="offers-heading"
       onMouseEnter={() => setIsPaused(true)}

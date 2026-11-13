@@ -682,7 +682,7 @@ select:focus-visible {
 /* ─── Real-Time Promotional & Bank Offers Section ─── */
 .offers-section {
   width: min(100% - 56px, var(--content-width));
-  margin: 44px auto 48px;
+  margin: 32px auto 48px;
 }
 
 .offers-section__header {
@@ -1380,8 +1380,8 @@ select:focus-visible {
 }
 
 .destinations-section {
-  padding-top: 48px;
-  padding-bottom: 56px;
+  padding-top: 52px;
+  padding-bottom: 24px;
 }
 
 .section-heading__copy {
@@ -1637,7 +1637,7 @@ select:focus-visible {
 }
 
 .benefits-section {
-  padding-top: 48px;
+  padding-top: 36px;
   padding-bottom: 56px;
 }
 
@@ -2822,7 +2822,7 @@ select:focus-visible {
 
   .offers-section {
     width: min(100% - 28px, var(--content-width));
-    margin: 36px auto 44px;
+    margin: 24px auto 36px;
   }
 
   .offers-carousel__track {
@@ -2996,8 +2996,8 @@ select:focus-visible {
   }
 
   .destinations-section {
-    padding-top: 28px;
-    padding-bottom: 42px;
+    padding-top: 32px;
+    padding-bottom: 18px;
   }
 
   .section-heading--row {
@@ -3060,8 +3060,8 @@ select:focus-visible {
   }
 
   .benefits-section {
-    padding-top: 21px;
-    padding-bottom: 47px;
+    padding-top: 24px;
+    padding-bottom: 40px;
   }
 
   .benefit-grid {

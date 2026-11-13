@@ -109,10 +109,12 @@ export function HomePage() {
         </div>
       </section>
 
+      {/* Popular Destinations Curated Corridors */}
+      <DestinationsSection onChooseDestination={chooseDestination} />
+
       {/* Real-Time Promotional & Bank Offers Carousel */}
       <OffersSection />
 
-      <DestinationsSection onChooseDestination={chooseDestination} />
       <BenefitsSection />
       <MembershipSection />
     </main>
