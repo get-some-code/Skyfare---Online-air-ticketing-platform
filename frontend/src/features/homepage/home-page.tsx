@@ -1,13 +1,14 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useState } from "react";
 
 import { Icon } from "@/components/ui/icon";
 import { BenefitsSection } from "@/features/homepage/components/benefits-section";
 import { DestinationsSection } from "@/features/homepage/components/destinations-section";
+import { FleetShowcase } from "@/features/homepage/components/fleet-showcase";
 import { FlightSearchForm } from "@/features/homepage/components/flight-search-form";
 import { MembershipSection } from "@/features/homepage/components/membership-section";
+import { OffersSection } from "@/features/homepage/components/offers-section";
 import { airports } from "@/features/homepage/data/homepage-fixtures";
 
 export function HomePage() {
@@ -89,26 +90,8 @@ export function HomePage() {
           </div>
         </div>
 
-        {/* Airplane Master Showcase Banner */}
-        <div className="hero-fleet-banner scroll-discover">
-          <Image
-            src="/images/hero-airplane.jpg"
-            alt="SkyFare modern commercial airliner in flight"
-            fill
-            sizes="(max-width: 1200px) 100vw, 1160px"
-            className="hero-fleet-banner__img"
-            priority
-          />
-          <div className="hero-fleet-banner__overlay">
-            <span className="hero-fleet-banner__tag">
-              <Icon name="plane" size={14} />
-              Commercial &amp; Executive Fleet
-            </span>
-            <span className="hero-fleet-banner__caption">
-              Direct routes across 500+ commercial and private aviation corridors
-            </span>
-          </div>
-        </div>
+        {/* Dynamic Fleet & Luxury Interior Showcase Slideshow */}
+        <FleetShowcase />
 
         <div id="search" className="search-anchor scroll-discover">
           <FlightSearchForm
@@ -125,6 +108,9 @@ export function HomePage() {
           )}
         </div>
       </section>
+
+      {/* Real-Time Promotional & Bank Offers Carousel */}
+      <OffersSection />
 
       <DestinationsSection onChooseDestination={chooseDestination} />
       <BenefitsSection />

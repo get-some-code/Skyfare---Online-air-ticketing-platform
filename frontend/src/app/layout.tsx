@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { AuthProvider } from "@/components/auth/auth-context";
 import { AuthModal } from "@/components/auth/auth-modal";
 import { CurrencyProvider } from "@/components/site/currency-context";
-import { TrustBar } from "@/components/site/demo-notice";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
 import "./globals.css";
@@ -23,7 +22,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <AuthProvider>
           <CurrencyProvider>
             <SiteHeader />
-            <TrustBar />
             <div className="app-content">{children}</div>
             <SiteFooter />
             <AuthModal />

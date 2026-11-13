@@ -1,11 +1,14 @@
 import { expect, test } from "@playwright/test";
 
-test("the SkyFare homepage renders its premium sections and trust indicators", async ({ page }) => {
+test("the SkyFare homepage renders its premium sections and promotional privileges", async ({ page }) => {
   await page.goto("/");
 
   await expect(page).toHaveTitle(/SkyFare/);
   await expect(
     page.getByRole("heading", { name: "Your Journey Begins Here" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Promotions & Bank Partnerships" }),
   ).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Popular Destinations" }),
@@ -16,9 +19,29 @@ test("the SkyFare homepage renders its premium sections and trust indicators", a
   await expect(
     page.getByRole("heading", { name: /SkyFare Privilege Club/ }),
   ).toBeVisible();
-  // Trust signals present
-  await expect(page.getByText("LIVE FARE PULSE")).toBeVisible();
-  await expect(page.getByText("IATA Certified")).toBeVisible();
+  // Trust signals & fleet showcase present
+  await expect(page.getByText("500+ Partner Airlines")).toBeVisible();
+  await expect(page.getByText("IATA Accredited", { exact: true })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Fleet and cabin interior showcase" })).toBeVisible();
+});
+
+test("promotional and bank offers rotate and filter properly", async ({ page }) => {
+  await page.goto("/");
+
+  const offersHeading = page.getByRole("heading", { name: "Promotions & Bank Partnerships" });
+  await expect(offersHeading).toBeVisible();
+
+  // Test filter pills
+  await page.getByRole("tab", { name: "Bank Offers" }).click();
+  await expect(page.getByText("HDFC Bank Infinia & Regalia")).toBeVisible();
+
+  await page.getByRole("tab", { name: "First-Time Flyer" }).click();
+  await expect(page.getByText("First Time Flyer Welcome")).toBeVisible();
+  await expect(page.getByText("SKYFIRST")).toBeVisible();
+
+  // Test copy promo code
+  await page.getByRole("button", { name: "Copy code SKYFIRST" }).click();
+  await expect(page.getByText("Copied! ✨")).toBeVisible();
 });
 
 test("currency and destination filters update the homepage", async ({
