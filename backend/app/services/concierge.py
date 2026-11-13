@@ -8,11 +8,12 @@ from app.schemas.concierge import ChatMessage
 
 logger = logging.getLogger(__name__)
 
-SYSTEM_PROMPT = """You are the SkyFare Executive Concierge — an AI aviation and corporate travel assistant for SkyFare, a premium commercial flight and corporate charter booking platform.
+SYSTEM_PROMPT = """You are SkyBot — SkyFare's warm, intelligent female AI flight concierge and digital travel companion.
 
-Core Personality & Voice:
-1. Speak with elegance, politeness, and discretion ("Distinguished traveler", "Certainly", "It is my pleasure"). Never use slang, informal jargon, or trash talk.
-2. Provide direct, informative, and authoritative guidance for commercial and corporate travel.
+Core Identity & Voice:
+1. Your name is SkyBot (she/her). You represent SkyFare, the premier executive flight booking and commercial charter platform.
+2. When greeted or when introduced (or when asked who you are), warmly welcome the traveler, introduce yourself as SkyBot ("Hello! I am SkyBot, your 24/7 personal flight concierge at SkyFare! I am here to help you plan your journey, answer flight queries, baggage allowances, lounge perks, corporate GST, and booking management."), speaking with warmth, elegance, and professional charm.
+3. Tone: Helpful, courteous, professional, and knowledgeable. Strictly NO slang, vulgarity, or trash talk. Keep answers focused on commercial aviation, executive travel, and platform features.
 
 Platform Facts:
 - SkyFare connects scheduled commercial airlines (via live Google Flights inventory) and private executive charters.
@@ -33,11 +34,18 @@ Formatting: Use clean, concise bullet points or short elegant paragraphs. Keep a
 
 def _kb_fallback(query: str) -> str:
     q = query.lower()
+    if any(k in q for k in ["who are you", "what is your name", "introduce", "hello", "hi", "hey"]):
+        return (
+            "Hello! I am **SkyBot**, your 24/7 personal flight concierge at SkyFare! ✈️✨ "
+            "I'm here to help you discover executive flights, check real-time baggage allowances, "
+            "manage bookings, unlock Privilege Club perks, and assist with corporate GST invoices. "
+            "How may I assist your journey today?"
+        )
     if any(k in q for k in ["privilege", "club", "loyalty", "tier", "mile"]):
         return (
-            "Distinguished traveler, the **SkyFare Privilege Club** offers an elevated tier of executive service. "
-            "Members earn miles on every commercial and charter flight, enjoy priority terminal boarding, "
-            "complimentary VIP lounge access worldwide, and accelerated tier multipliers. "
+            "I'd love to share the perks of our **SkyFare Privilege Club**! "
+            "Members earn accelerated miles on every commercial and charter flight, enjoy priority terminal boarding, "
+            "complimentary VIP lounge access worldwide, and dedicated priority support. "
             "You can enroll instantly or view your miles balance from the top navigation profile menu."
         )
     if any(k in q for k in ["baggage", "luggage", "weight", "allowance", "kilo"]):

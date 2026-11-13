@@ -9,9 +9,9 @@ const INITIAL_MESSAGES: ChatMessage[] = [
   {
     role: "assistant",
     content:
-      "Welcome to SkyFare Executive Concierge. I am your 24/7 aviation assistant powered by dual-model AI. " +
-      "I can assist with flight bookings, baggage limits, Privilege Club tiers, corporate GST invoicing, and cancellations. " +
-      "How may I tailor your journey today?",
+      "Hello! I am SkyBot, your 24/7 personal flight concierge at SkyFare! ✈️✨ " +
+      "I'm here to help you search flights, check baggage allowances, manage bookings, unlock Privilege Club perks, and assist with corporate GST invoices. " +
+      "How may I assist your journey today?",
   },
 ];
 
@@ -93,7 +93,7 @@ export function ConciergeChat() {
             }}
           >
             <span className="concierge-teaser__badge">24/7 AI Concierge</span>
-            <p>Traveling soon? Ask me about flights, baggage, lounges, or corporate GST!</p>
+            <p>Hi! I'm SkyBot ✈️ Click me to plan your flight, check baggage, or lounges!</p>
           </div>
           <button
             type="button"
@@ -109,26 +109,29 @@ export function ConciergeChat() {
         </div>
       )}
 
-      {/* Floating Trigger Pill */}
+      {/* Floating Trigger - Cute SkyBot Robot Avatar */}
       {!isOpen && (
         <button
           type="button"
-          className="concierge-trigger"
+          className="skybot-floating-trigger"
           onClick={() => {
             setIsOpen(true);
             setShowTeaser(false);
           }}
           aria-expanded={isOpen}
-          aria-label="Open SkyFare AI Concierge chat"
+          aria-label="Chat with SkyBot"
         >
-          <span className="concierge-trigger__icon">
-            <Icon name="spark" size={18} />
-          </span>
-          <span className="concierge-trigger__text">
-            <strong>AI Concierge</strong>
-            <span>24/7 Flight Support</span>
-          </span>
-          <span className="concierge-trigger__status" aria-label="Online" />
+          <div className="skybot-avatar-wrapper">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/skybot.png"
+              alt="SkyBot AI Concierge"
+              className="skybot-avatar-img"
+              width={64}
+              height={64}
+            />
+            <span className="skybot-online-badge" aria-label="Online" />
+          </div>
         </button>
       )}
 
@@ -142,14 +145,20 @@ export function ConciergeChat() {
           {/* Header */}
           <div className="concierge-window__header">
             <div className="concierge-window__brand">
-              <span className="concierge-avatar">
-                <Icon name="spark" size={18} />
-              </span>
+              <div className="skybot-header-avatar">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/images/skybot.png"
+                  alt="SkyBot"
+                  width={38}
+                  height={38}
+                />
+              </div>
               <div>
-                <strong className="concierge-title">SkyFare Concierge</strong>
+                <strong className="concierge-title">SkyBot</strong>
                 <span className="concierge-subtitle">
                   <span className="concierge-status-dot" />
-                  Dual-Model AI (Groq + Gemini Fallback)
+                  24/7 Aviation Concierge · Dual-Model AI
                 </span>
               </div>
             </div>
@@ -184,8 +193,14 @@ export function ConciergeChat() {
                 className={`concierge-msg concierge-msg--${m.role}`}
               >
                 {m.role === "assistant" && (
-                  <span className="concierge-msg__avatar">
-                    <Icon name="plane" size={14} />
+                  <span className="concierge-msg__avatar skybot-msg-avatar">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src="/images/skybot.png"
+                      alt="SkyBot"
+                      width={28}
+                      height={28}
+                    />
                   </span>
                 )}
                 <div className="concierge-msg__bubble">
@@ -196,8 +211,14 @@ export function ConciergeChat() {
 
             {isLoading && (
               <div className="concierge-msg concierge-msg--assistant">
-                <span className="concierge-msg__avatar">
-                  <Icon name="plane" size={14} />
+                <span className="concierge-msg__avatar skybot-msg-avatar">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/images/skybot.png"
+                    alt="SkyBot"
+                    width={28}
+                    height={28}
+                  />
                 </span>
                 <div className="concierge-msg__bubble concierge-typing">
                   <span />

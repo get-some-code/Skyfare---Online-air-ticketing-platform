@@ -191,24 +191,24 @@ test("authentication modal opens and switches between Sign In and Create Account
   await expect(authModal).not.toBeVisible();
 });
 
-test("AI Concierge floating chatbot widget opens and displays luxury concierge interface", async ({
+test("SkyBot floating robot avatar opens and introduces her luxury aviation concierge interface", async ({
   page,
 }) => {
   await page.goto("/");
 
-  const conciergeTrigger = page.getByRole("button", { name: "Open SkyFare AI Concierge chat" });
-  await expect(conciergeTrigger).toBeVisible();
+  const skybotTrigger = page.getByRole("button", { name: "Chat with SkyBot" });
+  await expect(skybotTrigger).toBeVisible();
 
-  // Open chatbot
-  await conciergeTrigger.click();
+  // Open SkyBot
+  await skybotTrigger.click({ force: true });
 
   const conciergeDialog = page.getByRole("dialog", { name: "SkyFare Executive Concierge Chat" });
   await expect(conciergeDialog).toBeVisible();
-  await expect(page.getByText("SkyFare Concierge")).toBeVisible();
-  await expect(page.locator(".concierge-subtitle")).toBeVisible();
+  await expect(page.locator(".concierge-title")).toHaveText("SkyBot");
+  await expect(page.getByText("Hello! I am SkyBot, your 24/7 personal flight concierge")).toBeVisible();
 
   // Close chatbot
   await page.getByRole("button", { name: "Close chat" }).click();
   await expect(conciergeDialog).not.toBeVisible();
-  await expect(conciergeTrigger).toBeVisible();
+  await expect(skybotTrigger).toBeVisible();
 });
