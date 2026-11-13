@@ -190,3 +190,25 @@ test("authentication modal opens and switches between Sign In and Create Account
   await page.getByRole("button", { name: "Close dialog" }).click();
   await expect(authModal).not.toBeVisible();
 });
+
+test("AI Concierge floating chatbot widget opens and displays luxury concierge interface", async ({
+  page,
+}) => {
+  await page.goto("/");
+
+  const conciergeTrigger = page.getByRole("button", { name: "Open SkyFare AI Concierge chat" });
+  await expect(conciergeTrigger).toBeVisible();
+
+  // Open chatbot
+  await conciergeTrigger.click();
+
+  const conciergeDialog = page.getByRole("dialog", { name: "SkyFare Executive Concierge Chat" });
+  await expect(conciergeDialog).toBeVisible();
+  await expect(page.getByText("SkyFare Concierge")).toBeVisible();
+  await expect(page.locator(".concierge-subtitle")).toBeVisible();
+
+  // Close chatbot
+  await page.getByRole("button", { name: "Close chat" }).click();
+  await expect(conciergeDialog).not.toBeVisible();
+  await expect(conciergeTrigger).toBeVisible();
+});

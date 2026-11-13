@@ -21,6 +21,8 @@ class Settings(BaseSettings):
     aviationstack_base_url: str = "https://api.aviationstack.com"
     serpapi_api_key: SecretStr | None = None
     serpapi_base_url: str = "https://serpapi.com/search.json"
+    groq_api_key: SecretStr | None = None
+    gemini_api_key: SecretStr | None = None
 
     model_config = SettingsConfigDict(
         env_file=".env",

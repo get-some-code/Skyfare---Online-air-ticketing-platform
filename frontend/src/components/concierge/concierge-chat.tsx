@@ -1,0 +1,233 @@
+"use client";
+
+import React, { useEffect, useRef, useState } from "react";
+
+import { Icon } from "@/components/ui/icon";
+import { type ChatMessage, sendConciergeMessageApi } from "@/lib/api/concierge";
+
+const INITIAL_MESSAGES: ChatMessage[] = [
+  {
+    role: "assistant",
+    content:
+      "Welcome to SkyFare Executive Concierge. I am your 24/7 aviation assistant powered by dual-model AI. " +
+      "I can assist with flight bookings, baggage limits, Privilege Club tiers, corporate GST invoicing, and cancellations. " +
+      "How may I tailor your journey today?",
+  },
+];
+
+const QUICK_PROMPTS = [
+  "What are the baggage allowances on Business Class?",
+  "How does Corporate GST invoicing work?",
+  "What benefits do I get with SkyFare Privilege Club?",
+  "How can I cancel or reschedule my flight?",
+  "Which direct routes fly to Dubai (DXB)?",
+];
+
+export function ConciergeChat() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_MESSAGES);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [activeProvider, setActiveProvider] = useState<string>("dual-ai");
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      inputRef.current?.focus();
+    }
+  }, [isOpen, messages, isLoading]);
+
+  async function handleSend(textToSend?: string) {
+    const userText = (textToSend ?? input).trim();
+    if (!userText || isLoading) return;
+
+    const newMessages: ChatMessage[] = [...messages, { role: "user", content: userText }];
+    setMessages(newMessages);
+    setInput("");
+    setIsLoading(true);
+
+    try {
+      const res = await sendConciergeMessageApi(newMessages);
+      setMessages([...newMessages, { role: "assistant", content: res.reply }]);
+      setActiveProvider(res.provider);
+    } catch {
+      setMessages([
+        ...newMessages,
+        {
+          role: "assistant",
+          content:
+            "I apologize, our concierge systems encountered a brief network interruption. " +
+            "Please try asking your question again or call our 24/7 priority line at +1 800 SKY-FARE.",
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  }
+
+  function handleReset() {
+    setMessages(INITIAL_MESSAGES);
+  }
+
+  return (
+    <div className="concierge-widget" aria-label="SkyFare AI Concierge">
+      {/* Floating Trigger Pill */}
+      {!isOpen && (
+        <button
+          type="button"
+          className="concierge-trigger"
+          onClick={() => setIsOpen(true)}
+          aria-expanded={isOpen}
+          aria-label="Open SkyFare AI Concierge chat"
+        >
+          <span className="concierge-trigger__icon">
+            <Icon name="spark" size={18} />
+          </span>
+          <span className="concierge-trigger__text">
+            <strong>AI Concierge</strong>
+            <span>24/7 Flight Support</span>
+          </span>
+          <span className="concierge-trigger__status" aria-label="Online" />
+        </button>
+      )}
+
+      {/* Floating Chat Drawer Window */}
+      {isOpen && (
+        <div
+          className="concierge-window"
+          role="dialog"
+          aria-label="SkyFare Executive Concierge Chat"
+        >
+          {/* Header */}
+          <div className="concierge-window__header">
+            <div className="concierge-window__brand">
+              <span className="concierge-avatar">
+                <Icon name="spark" size={18} />
+              </span>
+              <div>
+                <strong className="concierge-title">SkyFare Concierge</strong>
+                <span className="concierge-subtitle">
+                  <span className="concierge-status-dot" />
+                  Dual-Model AI (Groq + Gemini Fallback)
+                </span>
+              </div>
+            </div>
+
+            <div className="concierge-window__header-actions">
+              <button
+                type="button"
+                className="concierge-icon-btn"
+                onClick={handleReset}
+                title="Restart conversation"
+                aria-label="Restart conversation"
+              >
+                ↺
+              </button>
+              <button
+                type="button"
+                className="concierge-icon-btn"
+                onClick={() => setIsOpen(false)}
+                title="Close chat"
+                aria-label="Close chat"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+
+          {/* Messages Body */}
+          <div className="concierge-window__body">
+            {messages.map((m, idx) => (
+              <div
+                key={idx}
+                className={`concierge-msg concierge-msg--${m.role}`}
+              >
+                {m.role === "assistant" && (
+                  <span className="concierge-msg__avatar">
+                    <Icon name="plane" size={14} />
+                  </span>
+                )}
+                <div className="concierge-msg__bubble">
+                  <p>{m.content}</p>
+                </div>
+              </div>
+            ))}
+
+            {isLoading && (
+              <div className="concierge-msg concierge-msg--assistant">
+                <span className="concierge-msg__avatar">
+                  <Icon name="plane" size={14} />
+                </span>
+                <div className="concierge-msg__bubble concierge-typing">
+                  <span />
+                  <span />
+                  <span />
+                </div>
+              </div>
+            )}
+
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Quick Prompts (visible if conversation is short) */}
+          {messages.length <= 2 && (
+            <div className="concierge-quick-prompts">
+              <span className="concierge-quick-prompts__label">Suggested inquiries:</span>
+              <div className="concierge-quick-prompts__list">
+                {QUICK_PROMPTS.slice(0, 3).map((prompt, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    className="concierge-quick-pill"
+                    onClick={() => handleSend(prompt)}
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Input Footer */}
+          <div className="concierge-window__footer">
+            <input
+              ref={inputRef}
+              type="text"
+              className="concierge-input"
+              placeholder="Ask about flights, baggage, GST, lounges…"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              disabled={isLoading}
+              aria-label="Message to SkyFare Concierge"
+            />
+            <button
+              type="button"
+              className="concierge-send-btn"
+              onClick={() => handleSend()}
+              disabled={!input.trim() || isLoading}
+              aria-label="Send message"
+            >
+              <Icon name="search" size={16} />
+            </button>
+          </div>
+
+          {/* Provider Footer Notice */}
+          <div className="concierge-disclaimer">
+            <span>Verified AI Aviation Knowledge · Active provider: {activeProvider}</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { AuthProvider } from "@/components/auth/auth-context";
 import { AuthModal } from "@/components/auth/auth-modal";
+import { ConciergeChat } from "@/components/concierge/concierge-chat";
 import { CurrencyProvider } from "@/components/site/currency-context";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <div className="app-content">{children}</div>
             <SiteFooter />
             <AuthModal />
+            <ConciergeChat />
           </CurrencyProvider>
         </AuthProvider>
       </body>
