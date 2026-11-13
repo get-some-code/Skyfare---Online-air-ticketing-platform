@@ -8,5 +8,5 @@ router = APIRouter(prefix="/concierge", tags=["concierge"])
 
 @router.post("/chat", response_model=ChatResponse)
 async def chat_endpoint(payload: ChatRequest) -> ChatResponse:
-    reply, provider = await chat_with_concierge(payload.messages)
-    return ChatResponse(reply=reply, provider=provider, status="ok")
+    reply, provider, options = await chat_with_concierge(payload.messages)
+    return ChatResponse(reply=reply, provider=provider, options=options, status="ok")

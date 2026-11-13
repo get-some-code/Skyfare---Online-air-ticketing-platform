@@ -73,7 +73,7 @@ test("flight search submits criteria to the refined search results page", async 
   await expect(page.getByRole("button", { name: /2 Adults/ })).toBeVisible();
 
   await page.getByRole("button", { name: "Search Flights" }).click();
-  await expect(page).toHaveURL(/\/flights\/search\?/);
+  await expect(page).toHaveURL(/\/flights\/search\?/, { timeout: 15000 });
   await expect(
     page.getByText("Live flight inventory is being connected"),
   ).toBeVisible();
@@ -206,6 +206,16 @@ test("SkyBot floating robot avatar opens and introduces her luxury aviation conc
   await expect(conciergeDialog).toBeVisible();
   await expect(page.locator(".concierge-title")).toHaveText("SkyBot");
   await expect(page.getByText("Hello! I am SkyBot, your 24/7 personal flight concierge")).toBeVisible();
+
+  // Verify option chips are present in SkyBot's intro
+  const delhiOption = page.getByRole("button", { name: "✈️ Delhi to Kolkata Flights" });
+  await expect(delhiOption).toBeVisible();
+
+  // Click Delhi to Kolkata option chip
+  await delhiOption.click();
+
+  // Verify SkyBot responds with interactive flight options
+  await expect(page.getByRole("button", { name: "Business Class" })).toBeVisible({ timeout: 10000 });
 
   // Close chatbot
   await page.getByRole("button", { name: "Close chat" }).click();

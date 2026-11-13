@@ -1,9 +1,10 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 
 import { Icon } from "@/components/ui/icon";
-import { type ChatMessage, sendConciergeMessageApi } from "@/lib/api/concierge";
+import { type ChatMessage, type ChatOption, sendConciergeMessageApi } from "@/lib/api/concierge";
 
 const INITIAL_MESSAGES: ChatMessage[] = [
   {
@@ -12,6 +13,12 @@ const INITIAL_MESSAGES: ChatMessage[] = [
       "Hello! I am SkyBot, your 24/7 personal flight concierge at SkyFare! ✈️✨ " +
       "I'm here to help you search flights, check baggage allowances, manage bookings, unlock Privilege Club perks, and assist with corporate GST invoices. " +
       "How may I assist your journey today?",
+    options: [
+      { label: "✈️ Delhi to Kolkata Flights", value: "del to ccu flights" },
+      { label: "🌴 Flights to Dubai", value: "flights to dubai" },
+      { label: "🧳 Baggage Allowance", value: "What are the baggage allowances on Business Class?" },
+      { label: "💼 Corporate GST Invoicing", value: "How does Corporate GST invoicing work?" },
+    ],
   },
 ];
 
@@ -23,7 +30,59 @@ const QUICK_PROMPTS = [
   "Which direct routes fly to Dubai (DXB)?",
 ];
 
+function renderFormattedText(text: string) {
+  // Clean up any double bullet asterisks and dangling markers
+  const cleaned = text
+    .replace(/\*\s*\*\*/g, "\n• **")
+    .replace(/(?<=\s)\*(?=\s)/g, "");
+
+  const lines = cleaned.split("\n");
+
+  return (
+    <div className="skybot-text-body">
+      {lines.map((line, lineIdx) => {
+        const trimmed = line.trim();
+        if (!trimmed) {
+          return <div key={lineIdx} className="skybot-text-spacer" />;
+        }
+
+        const isBullet = trimmed.startsWith("• ") || trimmed.startsWith("- ") || trimmed.startsWith("* ");
+        const lineContent = isBullet ? trimmed.replace(/^[•\-\*]\s*/, "") : trimmed;
+
+        // Parse **bold** parts cleanly
+        const parts = lineContent.split(/(\*\*.*?\*\*)/g);
+        const renderedParts = parts.map((part, partIdx) => {
+          if (part.startsWith("**") && part.endsWith("**") && part.length >= 4) {
+            return (
+              <strong key={partIdx} className="skybot-bold">
+                {part.slice(2, -2)}
+              </strong>
+            );
+          }
+          return part;
+        });
+
+        if (isBullet) {
+          return (
+            <div key={lineIdx} className="skybot-bullet-item">
+              <span className="skybot-bullet-dot">•</span>
+              <span className="skybot-bullet-text">{renderedParts}</span>
+            </div>
+          );
+        }
+
+        return (
+          <p key={lineIdx} className="skybot-paragraph">
+            {renderedParts}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
 export function ConciergeChat() {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [showTeaser, setShowTeaser] = useState(true);
   const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_MESSAGES);
@@ -52,7 +111,10 @@ export function ConciergeChat() {
 
     try {
       const res = await sendConciergeMessageApi(newMessages);
-      setMessages([...newMessages, { role: "assistant", content: res.reply }]);
+      setMessages([
+        ...newMessages,
+        { role: "assistant", content: res.reply, options: res.options },
+      ]);
       setActiveProvider(res.provider);
     } catch {
       setMessages([
@@ -67,6 +129,14 @@ export function ConciergeChat() {
     } finally {
       setIsLoading(false);
     }
+  }
+
+  function handleOptionSelect(opt: ChatOption) {
+    if (opt.action === "search" && opt.url) {
+      router.push(opt.url);
+      return;
+    }
+    handleSend(opt.value);
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -93,7 +163,7 @@ export function ConciergeChat() {
             }}
           >
             <span className="concierge-teaser__badge">24/7 AI Concierge</span>
-            <p>Hi! I'm SkyBot ✈️ Click me to plan your flight, check baggage, or lounges!</p>
+            <p>Hi! I&apos;m SkyBot ✈️ Click me to plan your flight, check baggage, or lounges!</p>
           </div>
           <button
             type="button"
@@ -204,7 +274,23 @@ export function ConciergeChat() {
                   </span>
                 )}
                 <div className="concierge-msg__bubble">
-                  <p>{m.content}</p>
+                  {renderFormattedText(m.content)}
+                  {m.role === "assistant" && m.options && m.options.length > 0 && (
+                    <div className="skybot-options-container">
+                      <div className="skybot-options-list">
+                        {m.options.map((opt, optIdx) => (
+                          <button
+                            key={optIdx}
+                            type="button"
+                            className={`skybot-option-chip ${opt.action === "search" ? "skybot-option-chip--action" : ""}`}
+                            onClick={() => handleOptionSelect(opt)}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

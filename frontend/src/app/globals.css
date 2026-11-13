@@ -4318,6 +4318,108 @@ select:focus-visible {
   box-shadow: 0 4px 10px rgba(0, 77, 153, 0.25);
 }
 
+/* Rich Formatted Text in SkyBot Bubbles */
+.skybot-text-body {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.skybot-paragraph {
+  margin: 0;
+  line-height: 1.52;
+  font-size: 13.5px;
+}
+
+.skybot-text-spacer {
+  height: 4px;
+}
+
+.skybot-bold {
+  font-weight: 700;
+  color: inherit;
+}
+
+.concierge-msg--assistant .skybot-bold {
+  color: #00264d;
+}
+
+.skybot-bullet-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  line-height: 1.48;
+  font-size: 13px;
+  margin-left: 2px;
+}
+
+.skybot-bullet-dot {
+  color: #0284c7;
+  font-weight: 800;
+  font-size: 14px;
+  flex: 0 0 auto;
+  line-height: 1.3;
+}
+
+.skybot-bullet-text {
+  flex: 1 1 auto;
+}
+
+/* Interactive Option Chips inside SkyBot message */
+.skybot-options-container {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(2, 132, 199, 0.25);
+}
+
+.skybot-options-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.skybot-option-chip {
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  background: #f0f7ff;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  line-height: 1.25;
+  text-align: center;
+  user-select: none;
+}
+
+.skybot-option-chip:hover {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #0284c7;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(2, 132, 199, 0.28);
+}
+
+.skybot-option-chip:active {
+  transform: translateY(0);
+}
+
+.skybot-option-chip--action {
+  background: linear-gradient(135deg, #001f3f 0%, #004d99 100%);
+  color: #ffffff;
+  border-color: #003366;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0, 31, 63, 0.25);
+}
+
+.skybot-option-chip--action:hover {
+  background: linear-gradient(135deg, #002b57 0%, #005bb7 100%);
+  color: #ffffff;
+  border-color: #004080;
+  box-shadow: 0 6px 14px rgba(0, 31, 63, 0.35);
+}
+
 .concierge-typing {
   display: flex;
   align-items: center;
