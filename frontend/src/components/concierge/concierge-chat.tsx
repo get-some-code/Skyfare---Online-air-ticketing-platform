@@ -49,14 +49,29 @@ function renderFormattedText(text: string) {
         const isBullet = trimmed.startsWith("• ") || trimmed.startsWith("- ") || trimmed.startsWith("* ");
         const lineContent = isBullet ? trimmed.replace(/^[•\-\*]\s*/, "") : trimmed;
 
-        // Parse **bold** parts cleanly
-        const parts = lineContent.split(/(\*\*.*?\*\*)/g);
+        // Parse **bold** parts and [label](url) markdown links cleanly
+        const parts = lineContent.split(/(\*\*.*?\*\*|\[.*?\]\(.*?\))/g);
         const renderedParts = parts.map((part, partIdx) => {
           if (part.startsWith("**") && part.endsWith("**") && part.length >= 4) {
             return (
               <strong key={partIdx} className="skybot-bold">
                 {part.slice(2, -2)}
               </strong>
+            );
+          }
+          const linkMatch = part.match(/^\[(.*?)\]\((.*?)\)$/);
+          if (linkMatch) {
+            const [, linkText, linkUrl] = linkMatch;
+            return (
+              <a
+                key={partIdx}
+                href={linkUrl}
+                className="skybot-inline-link"
+                target={linkUrl.startsWith("http") ? "_blank" : undefined}
+                rel={linkUrl.startsWith("http") ? "noopener noreferrer" : undefined}
+              >
+                {linkText}
+              </a>
             );
           }
           return part;

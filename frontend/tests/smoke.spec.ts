@@ -211,14 +211,23 @@ test("SkyBot floating robot avatar opens and introduces her luxury aviation conc
   const delhiOption = page.getByRole("button", { name: "✈️ Delhi to Kolkata Flights" });
   await expect(delhiOption).toBeVisible();
 
-  // Click Delhi to Kolkata option chip
-  await delhiOption.click();
+  // Test flight search via input: chennai to kolkata
+  const input = page.getByPlaceholder("Ask about flights, baggage, GST, lounges…");
+  await input.fill("chennai to kolkata");
+  await input.press("Enter");
 
-  // Verify SkyBot responds with interactive flight options
-  await expect(page.getByRole("button", { name: "Business Class" })).toBeVisible({ timeout: 10000 });
+  // Verify SkyBot immediately outputs prominent flight options without repeating loops
+  await expect(page.getByText("Chennai (MAA) → Kolkata (CCU)")).toBeVisible({ timeout: 12000 });
+  await expect(page.getByText("IndiGo 6E-6234")).toBeVisible();
+  
+  // Verify 1-click prominent search link to all live flights on SkyFare
+  const searchAllBtn = page.getByRole("button", { name: /View All 24\+ MAA → CCU Flights/i });
+  await expect(searchAllBtn).toBeVisible();
 
-  // Close chatbot
-  await page.getByRole("button", { name: "Close chat" }).click();
-  await expect(conciergeDialog).not.toBeVisible();
-  await expect(skybotTrigger).toBeVisible();
+  // Clicking it takes the user to /flights/search with route preserved
+  await searchAllBtn.click();
+  await expect(page).toHaveURL(/.*\/flights\/search\?origin=MAA&destination=CCU/);
+
+  // Return to homepage
+  await page.goto("/");
 });

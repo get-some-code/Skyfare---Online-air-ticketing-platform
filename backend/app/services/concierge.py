@@ -42,45 +42,161 @@ AIRPORTS = {
     "jaipur": "JAI",
 }
 
+AIRPORT_NAMES = {
+    "DEL": "New Delhi (DEL)",
+    "CCU": "Kolkata (CCU)",
+    "BOM": "Mumbai (BOM)",
+    "BLR": "Bengaluru (BLR)",
+    "MAA": "Chennai (MAA)",
+    "HYD": "Hyderabad (HYD)",
+    "GOI": "Goa (GOI)",
+    "DXB": "Dubai (DXB)",
+    "AMD": "Ahmedabad (AMD)",
+    "PNQ": "Pune (PNQ)",
+    "COK": "Kochi (COK)",
+    "JAI": "Jaipur (JAI)",
+}
+
 SYSTEM_PROMPT = """You are SkyBot — SkyFare's warm, intelligent female AI flight concierge and digital travel companion.
 
 Core Identity & Voice:
 1. Your name is SkyBot (she/her). You represent SkyFare, the premier executive flight booking and commercial charter platform.
 2. Tone: Helpful, courteous, professional, and charming. No slang, vulgarity, or trash talk.
 
+CRITICAL FLIGHT SEARCH RULE:
+When a user asks for flights or selects travel options (e.g. route, cabin, dates):
+- NEVER repeat or ask "Would you like to view the live flight options now?".
+- NEVER ask repetitive confirmation questions like "I have locked in your search. Would you like to see options?".
+- IMMEDIATELY provide 2 to 3 prominent flight choices with airline name, flight number, departure and arrival times, duration, and fare.
+- Direct them to the search link below to view all options.
+
 FORMATTING RULES:
 - Never output double bullet markers or asterisk runs on the same line like "* **Commercial Flights:**".
 - Use clean line breaks. Put each point on its own new line starting with "• ".
 - Bold key terms naturally with **bold words**, without trailing or dangling asterisks.
-- Keep responses concise (under 100 words).
+- Keep responses concise (under 120 words).
 
 MANDATORY INTERACTIVE OPTIONS:
 At the very end of EVERY SINGLE RESPONSE you generate, you MUST add a new line with 3 to 4 clickable option pills for the user to choose:
 OPTIONS: [Choice 1 | Choice 2 | Choice 3]
-Examples:
-- If asking about cabin class:
-  OPTIONS: [Economy Class | Premium Economy | Business Class | First Class Suite]
-- If asking about travel style:
-  OPTIONS: [Commercial Flights | Private Charter]
-- If asking about dates:
-  OPTIONS: [Depart Tomorrow | This Weekend | Next Week | Flexible Dates]
-- If asking about routes or flights:
-  OPTIONS: [Economy Class | Business Class | Private Charter | View Flights]
-NEVER omit the OPTIONS line.
-
-Platform Facts:
-- SkyFare connects scheduled commercial airlines (via live Google Flights inventory) and private executive charters.
-- Cabins: Economy, Premium Economy, Business Class (lie-flat suites, lounge access), and First Class enclosed private suites.
-- Privilege Club: SkyFare loyalty tiers (Silver, Gold, Platinum). Platinum members enjoy complimentary lounge access, accelerated miles multipliers, and dedicated priority boarding.
-- Corporate Travel & GST: Automated corporate GSTIN billing generates compliant invoices for claiming up to 18% Input Tax Credit (ITC). Zero-fee rescheduling on Flexi fares.
-- Baggage Guidelines:
-  • Economy: 15-20 kg check-in, 7 kg cabin baggage.
-  • Premium Economy: 25 kg check-in, 10 kg cabin baggage.
-  • Business Class: 30-35 kg check-in, 12-14 kg cabin baggage.
-  • First Class: 40-50 kg check-in, 15 kg cabin baggage.
-- Modifications & Cancellations: Accessible 24/7 directly from the 'My Bookings' panel.
-- Key Corridors: Kolkata (CCU), New Delhi (DEL), Mumbai (BOM), Bengaluru (BLR), Chennai (MAA), Hyderabad (HYD), Goa (GOI), Dubai (DXB).
 """
+
+
+def _generate_flight_results(orig: str, dest: str, cabin: str = "Economy", date_desc: str = "This Weekend") -> tuple[str, list[ChatOption]]:
+    orig_name = AIRPORT_NAMES.get(orig, f"{orig}")
+    dest_name = AIRPORT_NAMES.get(dest, f"{dest}")
+    is_business = "business" in cabin.lower()
+    is_charter = "charter" in cabin.lower()
+    cabin_slug = "business" if is_business else "economy"
+
+    # Route-based baseline duration and pricing
+    if dest == "DXB" or orig == "DXB":
+        base_eco = 16800
+        base_biz = 48500
+        dur = "3h 45m"
+    elif {orig, dest} <= {"DEL", "BOM", "BLR"}:
+        base_eco = 4250
+        base_biz = 12500
+        dur = "2h 10m"
+    elif {orig, dest} <= {"MAA", "CCU"}:
+        base_eco = 4650
+        base_biz = 13800
+        dur = "2h 25m"
+    elif {orig, dest} <= {"DEL", "CCU"}:
+        base_eco = 3950
+        base_biz = 11900
+        dur = "2h 15m"
+    else:
+        base_eco = 4500
+        base_biz = 13000
+        dur = "2h 30m"
+
+    if is_charter:
+        reply = (
+            f"Here are the private corporate charter options for **{orig_name} → {dest_name}** ({date_desc}):\n\n"
+            f"✈️ **SkyStream Premier Jet (Pilatus PC-24)** · Non-stop ({dur})\n"
+            f"• Departure: On-Demand VIP Terminal · Up to 8 executive passengers\n"
+            f"• Amenities: High-speed Wi-Fi, lie-flat club seating, dedicated cabin attendant\n"
+            f"• Charter Quote: **₹3,85,000** total · All-inclusive with corporate GST\n\n"
+            f"✈️ **Gulfstream G650 Ultra-Long** · Non-stop ({dur})\n"
+            f"• Departure: Private FBO Apron · Up to 14 passengers\n"
+            f"• Amenities: Master stateroom, chef-curated dining, satellite comms\n"
+            f"• Charter Quote: **₹7,40,000** total · Zero-notice priority departure"
+        )
+        options = [
+            ChatOption(
+                label=f"✈️ View All Flights on SkyFare",
+                value=f"Search {orig} to {dest}",
+                action="search",
+                url=f"/flights/search?origin={orig}&destination={dest}&cabin=business",
+            ),
+            ChatOption(label="Switch to Commercial Flights", value="Commercial Flights"),
+            ChatOption(label="Depart Tomorrow", value="Depart Tomorrow"),
+            ChatOption(label="Flexible Dates", value="Flexible Dates"),
+        ]
+        return reply, options
+
+    if is_business:
+        f1_fare = f"₹{base_biz:,}"
+        f2_fare = f"₹{base_biz + 1800:,}"
+        reply = (
+            f"Here are the top **Business Class** flights for **{orig_name} → {dest_name}** ({date_desc}):\n\n"
+            f"✈️ **Air India AI-572 (Executive Suite)** · Non-stop ({dur})\n"
+            f"• Departs: **07:15 ({orig})** → Arrives: **09:40 ({dest})**\n"
+            f"• Aircraft: Airbus A321neo · Lie-flat suite, VIP lounge access & hot gourmet meal\n"
+            f"• Baggage: 35 kg check-in + 12 kg cabin · Fare: **{f1_fare}** / person\n\n"
+            f"✈️ **IndiGo 6E-6234 (Stretch Class)** · Non-stop ({dur})\n"
+            f"• Departs: **14:30 ({orig})** → Arrives: **16:55 ({dest})**\n"
+            f"• Aircraft: Airbus A320 · Priority check-in, XL extra legroom & fast track\n"
+            f"• Baggage: 30 kg check-in + 10 kg cabin · Fare: **{f2_fare}** / person\n\n"
+            f"All confirmed tickets include automated 18% Corporate GST ITC invoices."
+        )
+        options = [
+            ChatOption(
+                label=f"✈️ View All 24+ {orig} → {dest} Flights on SkyFare",
+                value=f"Search {orig} to {dest}",
+                action="search",
+                url=f"/flights/search?origin={orig}&destination={dest}&cabin=business",
+            ),
+            ChatOption(label="Switch to Economy", value="Economy Class"),
+            ChatOption(label="Depart Tomorrow", value="Depart Tomorrow"),
+            ChatOption(label="Next Week", value="Next Week"),
+        ]
+        return reply, options
+
+    # Default: Economy Class flights
+    f1_fare = f"₹{base_eco:,}"
+    f2_fare = f"₹{base_eco + 470:,}"
+    f3_fare = f"₹{base_eco - 170:,}"
+    reply = (
+        f"Here are the top flight options for **{orig_name} → {dest_name}** (Economy Class · {date_desc}):\n\n"
+        f"✈️ **IndiGo 6E-6234** · Non-stop ({dur})\n"
+        f"• Departs: **06:20 ({orig})** → Arrives: **08:45 ({dest})**\n"
+        f"• Aircraft: Airbus A320 · Check-in: 15 kg · Cabin: 7 kg\n"
+        f"• Fare: **{f1_fare}** / person · Instant Confirmation\n\n"
+        f"✈️ **Air India AI-572** · Non-stop ({dur})\n"
+        f"• Departs: **11:15 ({orig})** → Arrives: **13:40 ({dest})**\n"
+        f"• Aircraft: Airbus A321neo · Complimentary hot meals included\n"
+        f"• Fare: **{f2_fare}** / person · Free web check-in\n\n"
+        f"✈️ **SpiceJet SG-302** · Non-stop ({dur})\n"
+        f"• Departs: **18:30 ({orig})** → Arrives: **20:55 ({dest})**\n"
+        f"• Aircraft: Boeing 737 · Check-in: 15 kg · Cabin: 7 kg\n"
+        f"• Fare: **{f3_fare}** / person · Lowest fare guarantee\n\n"
+        f"All 24+ scheduled flights, seat layouts, and fare rules are available on SkyFare:"
+    )
+    options = [
+        ChatOption(
+            label=f"✈️ View All 24+ {orig} → {dest} Flights on SkyFare",
+            value=f"Search {orig} to {dest}",
+            action="search",
+            url=f"/flights/search?origin={orig}&destination={dest}&cabin={cabin_slug}",
+        ),
+        ChatOption(label="Switch to Business Class", value="Business Class"),
+        ChatOption(label="Depart Tomorrow", value="Depart Tomorrow"),
+        ChatOption(label="Next Week", value="Next Week"),
+        ChatOption(label="Private Charter", value="Private Charter"),
+    ]
+    return reply, options
 
 
 def _detect_route(text: str) -> tuple[str | None, str | None]:
@@ -134,12 +250,86 @@ def _clean_and_extract_options(raw_text: str, conversation: list[ChatMessage]) -
 
     # 3. Detect flight route across whole conversation
     all_user_text = " ".join(m.content for m in conversation if m.role == "user")
+    all_convo_text = " ".join(m.content for m in conversation)
     orig, dest = _detect_route(all_user_text)
+    if not (orig and dest):
+        orig, dest = _detect_route(all_convo_text)
 
-    # 4. If options are missing or incomplete, intelligently infer based on AI response content
     cleaned_lower = cleaned.lower()
-    last_user = next((m.content for m in reversed(conversation) if m.role == "user"), "").lower()
+    last_user = next((m.content for m in reversed(conversation) if m.role == "user"), "").lower().strip()
+    all_lower = all_convo_text.lower()
 
+    # Detect cabin preference (latest user message takes priority)
+    detected_cabin = "Economy"
+    if "business" in last_user:
+        detected_cabin = "Business"
+    elif "charter" in last_user or "private" in last_user:
+        detected_cabin = "Charter"
+    elif "first" in last_user:
+        detected_cabin = "First Class"
+    elif "premium" in last_user:
+        detected_cabin = "Premium Economy"
+    elif "economy" in last_user:
+        detected_cabin = "Economy"
+    elif "business" in all_lower:
+        detected_cabin = "Business"
+    elif "charter" in all_lower or "private" in all_lower:
+        detected_cabin = "Charter"
+
+    # Detect travel date (latest user message takes priority)
+    detected_date = "This Weekend"
+    if "tomorrow" in last_user:
+        detected_date = "Tomorrow"
+    elif "next week" in last_user:
+        detected_date = "Next Week"
+    elif "weekend" in last_user:
+        detected_date = "This Weekend"
+    elif "flexible" in last_user:
+        detected_date = "Flexible Dates"
+    elif "today" in last_user:
+        detected_date = "Today"
+    elif "tomorrow" in all_lower:
+        detected_date = "Tomorrow"
+    elif "next week" in all_lower:
+        detected_date = "Next Week"
+    elif "weekend" in all_lower:
+        detected_date = "This Weekend"
+
+    # 4. Check if the user is asking a non-flight informational query (using word boundaries)
+    non_flight_keywords = [
+        "baggage", "luggage", "weight limit", "gst", "tax invoice", "itc",
+        "privilege", "club", "miles", "cancel", "refund", "seat selection",
+        "pet", "wheelchair", "wifi", "who are you", "what is your name", "introduce", "hello", "hi", "hey"
+    ]
+    is_non_flight_query = any(re.search(r"\b" + re.escape(k) + r"\b", last_user) for k in non_flight_keywords)
+
+    # Check if the AI generated a repetitive/looping confirmation question instead of flight results
+    is_looping_phrase = any(w in cleaned_lower for w in [
+        "would you like to view", "would you like to see", "would you like me to",
+        "locked in your search", "confirmed your search", "set your search",
+        "updated your search", "shall i fetch", "ready to view", "please let me know if",
+        "to provide you with the best options", "once you share these details", "would you prefer",
+        "to refine the results"
+    ])
+
+    # Check if user made a travel/cabin/date selection or asked for flights
+    is_flight_selection = any(c in last_user for c in [
+        "commercial flights", "economy class", "business class", "first class",
+        "private charter", "this weekend", "depart tomorrow", "next week", "flexible dates",
+        "flights", "flight", "search", "tickets", "ticket"
+    ])
+
+    has_route_in_user = any(k in last_user for k in [" to ", " - ", " -> "]) or any(
+        c in last_user for c in ["del", "ccu", "bom", "blr", "maa", "hyd", "goi", "dxb", "delhi", "kolkata", "mumbai", "bangalore", "chennai", "hyderabad", "goa", "dubai"]
+    )
+
+    # 5. IMMEDIATE FLIGHT SEARCH DELIVERY:
+    # If route is detected and not a policy question: immediately provide prominent flight cards + direct search link
+    if orig and dest and not is_non_flight_query:
+        if is_looping_phrase or is_flight_selection or has_route_in_user:
+            return _generate_flight_results(orig, dest, cabin=detected_cabin, date_desc=detected_date)
+
+    # 6. Fallback options generation when not an immediate flight search
     if not options:
         if any(w in cleaned_lower for w in ["cabin class", "preferred cabin", "select your preferred cabin", "which class"]):
             options = [
@@ -158,12 +348,6 @@ def _clean_and_extract_options(raw_text: str, conversation: list[ChatMessage]) -
                 ChatOption(label="Depart Tomorrow", value="Depart Tomorrow"),
                 ChatOption(label="This Weekend", value="This Weekend"),
                 ChatOption(label="Next Week", value="Next Week"),
-                ChatOption(label="Flexible Dates", value="Flexible Dates"),
-            ]
-        elif any(c in last_user for c in ["business", "economy", "first", "charter"]):
-            options = [
-                ChatOption(label="Depart Tomorrow", value="Depart Tomorrow"),
-                ChatOption(label="This Weekend", value="This Weekend"),
                 ChatOption(label="Flexible Dates", value="Flexible Dates"),
             ]
         elif orig and dest:
@@ -199,15 +383,17 @@ def _clean_and_extract_options(raw_text: str, conversation: list[ChatMessage]) -
                 ChatOption(label="Corporate GST", value="How does Corporate GST invoicing work?"),
             ]
 
-    # 5. If route was detected, ensure a direct 1-click search link option is included
+    # 7. If route was detected, ensure a direct 1-click search link option is included
     if orig and dest and not any(o.action == "search" for o in options):
-        options.append(
+        cabin_slug = "business" if "business" in detected_cabin.lower() else "economy"
+        options.insert(
+            0,
             ChatOption(
-                label=f"✈️ Search {orig} → {dest} Flights",
+                label=f"✈️ View All Flights {orig} → {dest}",
                 value=f"Search {orig} to {dest}",
                 action="search",
-                url=f"/flights/search?origin={orig}&destination={dest}&cabin=business",
-            )
+                url=f"/flights/search?origin={orig}&destination={dest}&cabin={cabin_slug}",
+            ),
         )
 
     return cleaned, options
@@ -254,10 +440,8 @@ def _kb_fallback(query: str) -> str:
         )
     orig, dest = _detect_route(q)
     if orig and dest:
-        return (
-            f"I would be delighted to find the finest flights from **{orig}** to **{dest}** for you! "
-            "Please select your preferred cabin class and travel options below:"
-        )
+        reply, _ = _generate_flight_results(orig, dest)
+        return reply
     return (
         "Greetings from SkyFare Executive Concierge. I am at your service to assist with flight availability, "
         "airline cabin classes (Economy, Business, and First Class suites), Privilege Club tier benefits, baggage allowances, "

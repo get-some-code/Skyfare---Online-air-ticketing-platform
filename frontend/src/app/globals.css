@@ -4340,6 +4340,19 @@ select:focus-visible {
   color: inherit;
 }
 
+.skybot-inline-link {
+  color: var(--blue);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.skybot-inline-link:hover {
+  color: #00369a;
+}
+
 .concierge-msg--assistant .skybot-bold {
   color: #00264d;
 }
