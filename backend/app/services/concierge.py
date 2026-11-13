@@ -22,10 +22,24 @@ AIRPORTS = {
     "blr": "BLR",
     "bengaluru": "BLR",
     "bangalore": "BLR",
+    "maa": "MAA",
+    "chennai": "MAA",
+    "madras": "MAA",
+    "hyd": "HYD",
+    "hyderabad": "HYD",
     "goi": "GOI",
     "goa": "GOI",
     "dxb": "DXB",
     "dubai": "DXB",
+    "amd": "AMD",
+    "ahmedabad": "AMD",
+    "pnq": "PNQ",
+    "pune": "PNQ",
+    "cok": "COK",
+    "kochi": "COK",
+    "cochin": "COK",
+    "jai": "JAI",
+    "jaipur": "JAI",
 }
 
 SYSTEM_PROMPT = """You are SkyBot — SkyFare's warm, intelligent female AI flight concierge and digital travel companion.
@@ -38,13 +52,21 @@ FORMATTING RULES:
 - Never output double bullet markers or asterisk runs on the same line like "* **Commercial Flights:**".
 - Use clean line breaks. Put each point on its own new line starting with "• ".
 - Bold key terms naturally with **bold words**, without trailing or dangling asterisks.
-- Keep responses concise (under 120 words).
+- Keep responses concise (under 100 words).
 
-INTERACTIVE OPTIONS:
-- When asking the user to choose or provide travel details (such as cabin class, flight type, dates, or next action), DO NOT make them write a long paragraph. Provide 3-5 clean clickable choices at the very end of your message on a new line formatted exactly as:
-OPTIONS: [Choice 1 | Choice 2 | Choice 3 | Choice 4]
-Example:
-OPTIONS: [Economy Class | Business Class | Private Charter | View Flights Now]
+MANDATORY INTERACTIVE OPTIONS:
+At the very end of EVERY SINGLE RESPONSE you generate, you MUST add a new line with 3 to 4 clickable option pills for the user to choose:
+OPTIONS: [Choice 1 | Choice 2 | Choice 3]
+Examples:
+- If asking about cabin class:
+  OPTIONS: [Economy Class | Premium Economy | Business Class | First Class Suite]
+- If asking about travel style:
+  OPTIONS: [Commercial Flights | Private Charter]
+- If asking about dates:
+  OPTIONS: [Depart Tomorrow | This Weekend | Next Week | Flexible Dates]
+- If asking about routes or flights:
+  OPTIONS: [Economy Class | Business Class | Private Charter | View Flights]
+NEVER omit the OPTIONS line.
 
 Platform Facts:
 - SkyFare connects scheduled commercial airlines (via live Google Flights inventory) and private executive charters.
@@ -57,7 +79,7 @@ Platform Facts:
   • Business Class: 30-35 kg check-in, 12-14 kg cabin baggage.
   • First Class: 40-50 kg check-in, 15 kg cabin baggage.
 - Modifications & Cancellations: Accessible 24/7 directly from the 'My Bookings' panel.
-- Key Corridors: Kolkata (CCU), New Delhi (DEL), Mumbai (BOM), Bengaluru (BLR), Goa (GOI), Dubai (DXB).
+- Key Corridors: Kolkata (CCU), New Delhi (DEL), Mumbai (BOM), Bengaluru (BLR), Chennai (MAA), Hyderabad (HYD), Goa (GOI), Dubai (DXB).
 """
 
 
@@ -68,17 +90,30 @@ def _detect_route(text: str) -> tuple[str | None, str | None]:
     if m:
         w1 = m.group(1).strip()
         w2 = m.group(2).strip()
-        orig = next((code for name, code in AIRPORTS.items() if name in w1.split()), None)
-        dest = next((code for name, code in AIRPORTS.items() if name in w2.split()), None)
+        orig = None
+        dest = None
+        # Check longest airport names first
+        for name in sorted(AIRPORTS.keys(), key=len, reverse=True):
+            if not orig and name in w1:
+                orig = AIRPORTS[name]
+            if not dest and name in w2:
+                dest = AIRPORTS[name]
         if orig and dest and orig != dest:
             return orig, dest
+
+    # Direct code detection (e.g., "del", "ccu")
+    words = re.findall(r"\b[a-z]{3}\b", t)
+    found_codes = [AIRPORTS[w] for w in words if w in AIRPORTS]
+    if len(found_codes) >= 2 and found_codes[0] != found_codes[1]:
+        return found_codes[0], found_codes[1]
+
     return None, None
 
 
 def _clean_and_extract_options(raw_text: str, conversation: list[ChatMessage]) -> tuple[str, list[ChatOption]]:
     options: list[ChatOption] = []
 
-    # 1. Extract explicit OPTIONS: [opt1 | opt2]
+    # 1. Extract explicit OPTIONS: [opt1 | opt2] from AI reply
     opt_match = re.search(r"OPTIONS:\s*\[(.*?)\]", raw_text, re.IGNORECASE | re.DOTALL)
     if opt_match:
         choices = opt_match.group(1).split("|")
@@ -94,7 +129,6 @@ def _clean_and_extract_options(raw_text: str, conversation: list[ChatMessage]) -
     cleaned = re.sub(r"([a-zA-Z0-9\.\:\?])\s+\*\s+", r"\1\n• ", cleaned)
     cleaned = re.sub(r"\n\s*\*\s*", r"\n• ", cleaned)
     cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
-    # Remove dangling standalone asterisks
     cleaned = re.sub(r"(?<=\s)\*(?=\s)", "", cleaned)
     cleaned = cleaned.strip()
 
@@ -102,35 +136,79 @@ def _clean_and_extract_options(raw_text: str, conversation: list[ChatMessage]) -
     all_user_text = " ".join(m.content for m in conversation if m.role == "user")
     orig, dest = _detect_route(all_user_text)
 
-    if orig and dest:
-        last_user = next((m.content for m in reversed(conversation) if m.role == "user"), "").lower()
-        if any(c in last_user for c in ["business", "economy", "first", "charter"]):
-            # User already picked a cabin! Offer date options and direct search link
+    # 4. If options are missing or incomplete, intelligently infer based on AI response content
+    cleaned_lower = cleaned.lower()
+    last_user = next((m.content for m in reversed(conversation) if m.role == "user"), "").lower()
+
+    if not options:
+        if any(w in cleaned_lower for w in ["cabin class", "preferred cabin", "select your preferred cabin", "which class"]):
+            options = [
+                ChatOption(label="Economy Class", value="Economy Class"),
+                ChatOption(label="Premium Economy", value="Premium Economy"),
+                ChatOption(label="Business Class", value="Business Class"),
+                ChatOption(label="First Class Suite", value="First Class Suite"),
+            ]
+        elif any(w in cleaned_lower for w in ["commercial or private", "travel style", "charter or commercial"]):
+            options = [
+                ChatOption(label="Commercial Flights", value="Commercial Flights"),
+                ChatOption(label="Private Charter", value="Private Charter"),
+            ]
+        elif any(w in cleaned_lower for w in ["date", "timing", "when would you like", "preferred dates", "depart"]):
+            options = [
+                ChatOption(label="Depart Tomorrow", value="Depart Tomorrow"),
+                ChatOption(label="This Weekend", value="This Weekend"),
+                ChatOption(label="Next Week", value="Next Week"),
+                ChatOption(label="Flexible Dates", value="Flexible Dates"),
+            ]
+        elif any(c in last_user for c in ["business", "economy", "first", "charter"]):
             options = [
                 ChatOption(label="Depart Tomorrow", value="Depart Tomorrow"),
                 ChatOption(label="This Weekend", value="This Weekend"),
                 ChatOption(label="Flexible Dates", value="Flexible Dates"),
-                ChatOption(
-                    label=f"✈️ Search {orig} → {dest} Flights",
-                    value=f"Search {orig} to {dest}",
-                    action="search",
-                    url=f"/flights/search?origin={orig}&destination={dest}&cabin=business",
-                ),
             ]
-        elif not options:
-            # First turn after route inquiry: offer cabin class options & instant search
+        elif orig and dest:
             options = [
+                ChatOption(label="Commercial Flights", value="Commercial Flights"),
                 ChatOption(label="Economy Class", value="Economy Class"),
                 ChatOption(label="Business Class", value="Business Class"),
-                ChatOption(label="First Class Suite", value="First Class Suite"),
                 ChatOption(label="Private Charter", value="Private Charter"),
-                ChatOption(
-                    label=f"✈️ View {orig} → {dest} Fares",
-                    value=f"Search {orig} to {dest}",
-                    action="search",
-                    url=f"/flights/search?origin={orig}&destination={dest}&cabin=business",
-                ),
             ]
+        elif any(k in cleaned_lower for k in ["baggage", "allowance", "luggage"]):
+            options = [
+                ChatOption(label="Economy Limits (15kg)", value="Economy baggage rules"),
+                ChatOption(label="Business Limits (35kg)", value="Business class baggage rules"),
+                ChatOption(label="Excess Baggage Rates", value="How to pre-book excess baggage"),
+            ]
+        elif any(k in cleaned_lower for k in ["privilege", "club", "miles", "loyalty"]):
+            options = [
+                ChatOption(label="Silver Tier Benefits", value="Silver tier benefits"),
+                ChatOption(label="Gold Tier Benefits", value="Gold tier benefits"),
+                ChatOption(label="Platinum Lounge Perks", value="Platinum lounge perks"),
+            ]
+        elif any(k in cleaned_lower for k in ["gst", "corporate", "tax", "itc"]):
+            options = [
+                ChatOption(label="How to Add GSTIN", value="How to add corporate GSTIN"),
+                ChatOption(label="18% ITC Tax Invoices", value="18% ITC corporate tax invoice details"),
+                ChatOption(label="Zero-Fee Flexi Reschedule", value="Corporate flexi reschedule rules"),
+            ]
+        else:
+            options = [
+                ChatOption(label="Search Flights", value="Help me find flights"),
+                ChatOption(label="Baggage Allowances", value="What are the baggage allowances?"),
+                ChatOption(label="Privilege Club", value="Tell me about Privilege Club"),
+                ChatOption(label="Corporate GST", value="How does Corporate GST invoicing work?"),
+            ]
+
+    # 5. If route was detected, ensure a direct 1-click search link option is included
+    if orig and dest and not any(o.action == "search" for o in options):
+        options.append(
+            ChatOption(
+                label=f"✈️ Search {orig} → {dest} Flights",
+                value=f"Search {orig} to {dest}",
+                action="search",
+                url=f"/flights/search?origin={orig}&destination={dest}&cabin=business",
+            )
+        )
 
     return cleaned, options
 
