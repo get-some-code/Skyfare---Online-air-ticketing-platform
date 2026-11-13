@@ -7,10 +7,10 @@ Design reference screenshots are preserved in [`skyfare/design-references/`](./s
 ## Frontend implementation status
 
 The shared responsive layout and homepage are implemented from the supplied
-design references. `/flights/search` is a criteria-only preview page: there is
-no live flight search, inventory, booking, authentication, payment processing,
-or ticketing. Example routes and fares are clearly marked development fixtures
-and are not live prices or availability.
+design references. `/flights/search` still shows the captured criteria only;
+it does not call the API yet. The FastAPI service now provides account
+authentication, a seeded flight catalog, search, and unpaid reservations.
+Card payments, live airline inventory, and email delivery are not included.
 
 ## Requirements
 
@@ -72,12 +72,34 @@ authentication. Generate a development secret with:
 python -c "import secrets; print(secrets.token_urlsafe(48))"
 ```
 
-Apply migrations and start the API:
+Apply migrations, load the development catalog, and start the API:
 
 ```powershell
 alembic upgrade head
+python -m app.db.seed
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
+
+In `APP_ENV=development` the API also seeds the catalog on startup when the
+airport table is empty. Authentication stays disabled until `JWT_SECRET_KEY`
+is replaced with a random secret.
+
+Authenticated routes expect `Authorization: Bearer <access_token>`.
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| POST | `/api/v1/auth/register` | Create an account and a member profile |
+| POST | `/api/v1/auth/login` | Issue access and refresh tokens |
+| POST | `/api/v1/auth/refresh` | Rotate a refresh token |
+| POST | `/api/v1/auth/logout` | Revoke a refresh token |
+| GET, PATCH | `/api/v1/auth/me` | Read or update the signed-in profile |
+| GET, POST | `/api/v1/auth/membership` | Read miles or join Privilege Club |
+| GET | `/api/v1/airports` | Airport directory |
+| GET | `/api/v1/destinations` | Featured destination cards |
+| GET | `/api/v1/flights/search` | Search seeded fares |
+| POST, GET | `/api/v1/bookings` | Reserve seats or list your bookings |
+| GET | `/api/v1/bookings/{reference}` | Read one of your bookings |
+| POST | `/api/v1/bookings/{reference}/cancel` | Cancel a reservation and release seats |
 
 OpenAPI docs are at <http://localhost:8000/docs>. Liveness and readiness
 endpoints are `/api/v1/health` and `/api/v1/ready`.

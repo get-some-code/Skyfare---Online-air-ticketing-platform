@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { useAuth } from "@/components/auth/auth-context";
 import { Icon } from "@/components/ui/icon";
 import { PreviewDialog } from "@/components/ui/preview-dialog";
 
@@ -13,7 +14,34 @@ const membershipBenefits = [
 ];
 
 export function MembershipSection() {
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const { user, isAuthenticated, openAuthModal, joinPrivilegeClub } = useAuth();
+  const [feedback, setFeedback] = useState<{ title: string; message: string } | null>(null);
+
+  async function handleJoin() {
+    if (!isAuthenticated) {
+      openAuthModal("register");
+      return;
+    }
+    if (user?.membership) {
+      setFeedback({
+        title: "Active Privilege Club Member",
+        message: `You are already enrolled as a ${user.membership.tier} tier member with ${user.membership.miles.toLocaleString()} earned miles. Enjoy your global executive benefits!`,
+      });
+      return;
+    }
+    try {
+      await joinPrivilegeClub();
+      setFeedback({
+        title: "Welcome to the Platinum Club",
+        message: "Your SkyFare Privilege Club membership is now active! You will now automatically earn corporate miles on every flight and charter booking.",
+      });
+    } catch (err: unknown) {
+      setFeedback({
+        title: "Enrollment Error",
+        message: err instanceof Error ? err.message : "Failed to activate membership.",
+      });
+    }
+  }
 
   return (
     <>
@@ -40,7 +68,7 @@ export function MembershipSection() {
             <button
               type="button"
               className="button button--primary"
-              onClick={() => setDialogOpen(true)}
+              onClick={handleJoin}
             >
               Join Free Today
               <Icon name="arrow-right" size={18} />
@@ -55,9 +83,11 @@ export function MembershipSection() {
         <div className="membership-card">
           <div className="membership-card__top">
             <span>EXECUTIVE TIER LEVEL</span>
-            <span className="membership-card__badge">Platinum Club</span>
+            <span className="membership-card__badge">
+              {user?.membership ? user.membership.tier : "Platinum Club"}
+            </span>
           </div>
-          <strong>125,000+</strong>
+          <strong>{user?.membership ? `${user.membership.miles.toLocaleString()} Miles` : "125,000+"}</strong>
           <div className="membership-card__rule" />
           <ul>
             {membershipBenefits.map((benefit) => (
@@ -69,11 +99,12 @@ export function MembershipSection() {
           </ul>
         </div>
       </section>
+
       <PreviewDialog
-        open={dialogOpen}
-        title="Membership registration is coming soon"
-        message="SkyFare Privilege Club enrolment will be available once account management is live. You will be able to earn miles and access lounge benefits on every booking."
-        onClose={() => setDialogOpen(false)}
+        open={feedback !== null}
+        title={feedback?.title ?? ""}
+        message={feedback?.message ?? ""}
+        onClose={() => setFeedback(null)}
       />
     </>
   );

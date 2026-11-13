@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { AuthProvider } from "@/components/auth/auth-context";
+import { AuthModal } from "@/components/auth/auth-modal";
 import { CurrencyProvider } from "@/components/site/currency-context";
 import { TrustBar } from "@/components/site/demo-notice";
 import { SiteFooter } from "@/components/site/site-footer";
@@ -18,12 +20,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" data-scroll-behavior="smooth">
       <body>
-        <CurrencyProvider>
-          <SiteHeader />
-          <TrustBar />
-          <div className="app-content">{children}</div>
-          <SiteFooter />
-        </CurrencyProvider>
+        <AuthProvider>
+          <CurrencyProvider>
+            <SiteHeader />
+            <TrustBar />
+            <div className="app-content">{children}</div>
+            <SiteFooter />
+            <AuthModal />
+          </CurrencyProvider>
+        </AuthProvider>
       </body>
     </html>
   );

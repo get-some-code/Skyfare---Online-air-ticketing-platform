@@ -17,6 +17,10 @@ class Settings(BaseSettings):
     jwt_secret_key: SecretStr | None = None
     jwt_access_token_minutes: int = 15
     jwt_refresh_token_days: int = 30
+    aviationstack_api_key: SecretStr | None = None
+    aviationstack_base_url: str = "https://api.aviationstack.com"
+    serpapi_api_key: SecretStr | None = None
+    serpapi_base_url: str = "https://serpapi.com/search.json"
 
     model_config = SettingsConfigDict(
         env_file=".env",

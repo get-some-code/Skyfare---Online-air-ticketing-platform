@@ -136,3 +136,23 @@ test("the mobile menu and responsive layout work without horizontal overflow", a
     "false",
   );
 });
+
+test("authentication modal opens and switches between Sign In and Create Account", async ({
+  page,
+}) => {
+  await page.goto("/");
+
+  await page.getByRole("button", { name: "Login" }).click();
+  const authModal = page.getByRole("dialog");
+  await expect(authModal).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sign In to Your Account" })).toBeVisible();
+
+  // Switch to Create Account
+  await page.getByRole("tab", { name: "Create Account" }).click();
+  await expect(page.getByRole("heading", { name: "Create SkyFare Account" })).toBeVisible();
+  await expect(page.getByLabel("Full Name")).toBeVisible();
+
+  // Close dialog
+  await page.getByRole("button", { name: "Close dialog" }).click();
+  await expect(authModal).not.toBeVisible();
+});

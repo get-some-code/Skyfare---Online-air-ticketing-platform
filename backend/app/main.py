@@ -1,4 +1,5 @@
 import logging
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -9,17 +10,31 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.api.v1.router import router as v1_router
 from app.core.config import get_settings
 from app.core.errors import ErrorResponse
+from app.core.exceptions import ServiceError
 from app.core.logging import configure_logging
 from app.core.middleware import RequestIdMiddleware
+from app.db.seed import seed_if_empty
 
 settings = get_settings()
 configure_logging(settings.log_level)
 logger = logging.getLogger(__name__)
 
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    if settings.app_env == "development":
+        try:
+            seed_if_empty()
+        except Exception:
+            logger.warning("Development catalog seed skipped because the database is unavailable")
+    yield
+
+
 app = FastAPI(
     title=settings.app_name,
     version="0.1.0",
     description="SkyFare versioned REST API.",
+    lifespan=lifespan,
 )
 
 app.add_middleware(RequestIdMiddleware)
@@ -31,6 +46,21 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type", "X-Request-ID"],
 )
 app.include_router(v1_router, prefix=settings.api_v1_prefix)
+
+
+@app.exception_handler(ServiceError)
+async def handle_service_error(request: Request, exc: ServiceError) -> JSONResponse:
+    error = ErrorResponse(
+        code=exc.code,
+        message=exc.message,
+        request_id=getattr(request.state, "request_id", None),
+    )
+    headers = {"WWW-Authenticate": "Bearer"} if exc.status_code == 401 else None
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=error.model_dump(mode="json"),
+        headers=headers,
+    )
 
 
 @app.exception_handler(StarletteHTTPException)
