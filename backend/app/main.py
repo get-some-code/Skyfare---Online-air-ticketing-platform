@@ -22,11 +22,14 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    if settings.app_env == "development":
-        try:
-            seed_if_empty()
-        except Exception:
-            logger.warning("Development catalog seed skipped because the database is unavailable")
+    try:
+        from app.db.base import Base
+        from app.db.session import engine
+        import app.models  # ensure models are registered
+        Base.metadata.create_all(bind=engine)
+        seed_if_empty()
+    except Exception as e:
+        logger.warning("Database setup or catalog seed skipped: %s", e)
     yield
 
 
@@ -41,6 +44,7 @@ app.add_middleware(RequestIdMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,
+    allow_origin_regex=r"https://.*\.vercel\.app" if settings.app_env in ["production", "staging"] else None,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type", "X-Request-ID"],
