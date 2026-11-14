@@ -3823,21 +3823,24 @@ select:focus-visible {
   line-height: 1.5;
 }
 
-.auth-modal__tabs {
+.auth-modal__tabs,
+.auth-tabs {
   display: flex;
+  width: 100%;
   border-bottom: 2px solid #eef3f9;
   margin-top: 18px;
+  margin-bottom: 24px;
 }
 
 .auth-tab {
   flex: 1;
-  padding: 10px 0;
+  padding: 11px 16px;
   text-align: center;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 14.5px;
   background: none;
   border: none;
-  border-bottom: 2px solid transparent;
+  border-bottom: 2.5px solid transparent;
   margin-bottom: -2px;
   color: #5d7081;
   cursor: pointer;
@@ -5798,11 +5801,11 @@ select:focus-visible {
 
 .auth-page-card {
   width: 100%;
-  max-width: 480px;
+  max-width: 460px;
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 20px;
-  padding: 36px 32px;
+  padding: 38px 36px 32px;
   box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
 }
 
@@ -5816,6 +5819,10 @@ select:focus-visible {
   margin-bottom: 12px;
 }
 
+.auth-page-header {
+  margin-bottom: 20px;
+}
+
 .auth-page-header h1 {
   font-size: 24px;
   font-weight: 700;
@@ -5827,8 +5834,8 @@ select:focus-visible {
 .auth-page-header p {
   font-size: 14px;
   color: #64748b;
-  margin: 0 0 20px;
-  line-height: 1.45;
+  margin: 0;
+  line-height: 1.5;
 }
 
 .auth-error-banner {

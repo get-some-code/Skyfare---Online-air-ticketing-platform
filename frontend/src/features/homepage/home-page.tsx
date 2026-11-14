@@ -91,9 +91,6 @@ export function HomePage() {
           </div>
         </div>
 
-        {/* AI Trip Planner Quick Launch Teaser */}
-        <PlannerTeaserSection />
-
         {/* Dynamic Fleet & Luxury Interior Showcase Slideshow */}
         <FleetShowcase />
 
@@ -115,6 +112,9 @@ export function HomePage() {
 
       {/* Popular Destinations Curated Corridors */}
       <DestinationsSection onChooseDestination={chooseDestination} />
+
+      {/* AI Trip Planner Section */}
+      <PlannerTeaserSection />
 
       {/* Real-Time Promotional & Bank Offers Carousel */}
       <OffersSection />

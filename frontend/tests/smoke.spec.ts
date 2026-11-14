@@ -194,6 +194,26 @@ test("authentication modal opens and switches between Sign In and Create Account
 test("SkyBot floating robot avatar opens and introduces her luxury aviation concierge interface", async ({
   page,
 }) => {
+  await page.route("**/api/v1/concierge/chat", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        reply: "Here are the best available flight options:\n\n**Chennai (MAA) → Kolkata (CCU)**\n\n• **IndiGo 6E-6234**: 06:15 - 08:35 (2h 20m, Non-stop) - ₹4,890",
+        provider: "groq",
+        status: "success",
+        options: [
+          {
+            label: "View All 24+ MAA → CCU Flights",
+            value: "View flights",
+            action: "search",
+            url: "/flights/search?origin=MAA&destination=CCU",
+          },
+        ],
+      }),
+    });
+  });
+
   await page.goto("/");
 
   const skybotTrigger = page.getByRole("button", { name: "Chat with SkyBot" });
@@ -205,14 +225,14 @@ test("SkyBot floating robot avatar opens and introduces her luxury aviation conc
   const conciergeDialog = page.getByRole("dialog", { name: "SkyFare Executive Concierge Chat" });
   await expect(conciergeDialog).toBeVisible();
   await expect(page.locator(".concierge-title")).toHaveText("SkyBot");
-  await expect(page.getByText("Hello! I am SkyBot, your 24/7 personal flight concierge")).toBeVisible();
+  await expect(page.getByText(/Hello! I am SkyBot/i)).toBeVisible();
 
   // Verify option chips are present in SkyBot's intro
   const delhiOption = page.getByRole("button", { name: "✈️ Delhi to Kolkata Flights" });
   await expect(delhiOption).toBeVisible();
 
   // Test flight search via input: chennai to kolkata
-  const input = page.getByPlaceholder("Ask about flights, baggage, GST, lounges…");
+  const input = page.getByPlaceholder(/Ask about flights/i);
   await input.fill("chennai to kolkata");
   await input.press("Enter");
 

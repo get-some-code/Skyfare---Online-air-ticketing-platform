@@ -89,7 +89,7 @@ function LoginForm() {
           </p>
         </div>
 
-        <div className="auth-tabs" role="tablist">
+        <div className="auth-modal__tabs auth-tabs" role="tablist">
           <button
             type="button"
             role="tab"

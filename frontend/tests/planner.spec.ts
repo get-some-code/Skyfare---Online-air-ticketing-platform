@@ -11,7 +11,7 @@ test.describe("SkyFare v2 - AI Trip Planner feature", () => {
     await expect(plannerLink).toHaveAttribute("href", "/planner");
   });
 
-  test("landing page renders Trip Planner teaser section above carousel", async ({ page }) => {
+  test("landing page renders Trip Planner teaser section above offers section", async ({ page }) => {
     await page.goto("/");
     const teaser = page.locator(".planner-teaser");
     await expect(teaser).toBeVisible();
