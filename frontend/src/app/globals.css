@@ -699,7 +699,7 @@ select:focus-visible {
   font-weight: 700;
   letter-spacing: -0.04em;
   color: var(--ink);
-  margin: 6px 0 8px;
+  margin: 0 0 8px;
 }
 
 .offers-section__title-group p {
@@ -1783,7 +1783,7 @@ select:focus-visible {
 }
 
 .membership-section h2 {
-  margin: 19px 0 12px;
+  margin: 0 0 14px;
   font-size: clamp(29px, 3.2vw, 42px);
   font-weight: 700;
   letter-spacing: -0.05em;
@@ -4691,9 +4691,11 @@ select:focus-visible {
 
 .concierge-title {
   display: block;
-  font-size: 14.5px;
+  font-size: 15px;
   font-weight: 700;
   color: #ffffff;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
 }
 
 .concierge-subtitle {

@@ -241,10 +241,6 @@ export function ConciergeChat() {
               </div>
               <div>
                 <strong className="concierge-title">SkyBot</strong>
-                <span className="concierge-subtitle">
-                  <span className="concierge-status-dot" />
-                  24/7 Aviation Concierge · Dual-Model AI
-                </span>
               </div>
             </div>
 

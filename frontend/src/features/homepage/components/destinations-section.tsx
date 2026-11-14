@@ -40,10 +40,6 @@ export function DestinationsSection({
     >
       <div className="section-heading section-heading--row scroll-discover">
         <div className="section-heading__copy">
-          <span className="eyebrow eyebrow--blue">
-            <Icon name="compass" size={16} />
-            Curated Getaways
-          </span>
           <h2 id="destinations-heading">Popular Destinations</h2>
           <p>
             Hand-picked premium routes and corporate corridors with privileged

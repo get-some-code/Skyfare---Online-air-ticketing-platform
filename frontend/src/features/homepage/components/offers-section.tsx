@@ -138,10 +138,6 @@ export function OffersSection() {
     >
       <div className="offers-section__header">
         <div className="offers-section__title-group">
-          <span className="eyebrow eyebrow--gold">
-            <Icon name="spark" size={14} />
-            Exclusive Travel Privileges
-          </span>
           <h2 id="offers-heading">Promotions &amp; Bank Partnerships</h2>
           <p>
             Curated partner discounts, corporate tax benefits, and first-time flyer credits updated in real-time.

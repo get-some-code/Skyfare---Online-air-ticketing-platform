@@ -51,10 +51,6 @@ export function MembershipSection() {
         aria-labelledby="membership-heading"
       >
         <div className="membership-section__copy">
-          <span className="eyebrow eyebrow--dark">
-            <Icon name="spark" size={16} />
-            Loyalty Rewards &amp; Corporate SOW
-          </span>
           <h2 id="membership-heading">
             SkyFare Privilege Club &amp; Enterprise Pass
           </h2>

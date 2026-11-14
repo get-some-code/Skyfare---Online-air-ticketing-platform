@@ -9,10 +9,6 @@ export function BenefitsSection() {
       aria-labelledby="benefits-heading"
     >
       <div className="section-heading section-heading--center scroll-discover">
-        <span className="eyebrow eyebrow--blue">
-          <Icon name="badge" size={16} />
-          Standard of Excellence
-        </span>
         <h2 id="benefits-heading">Why Choose SkyFare</h2>
         <p>
           Engineered for speed, fiscal accountability, and bespoke executive
