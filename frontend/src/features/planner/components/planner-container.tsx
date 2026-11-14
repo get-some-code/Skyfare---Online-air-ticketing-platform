@@ -179,7 +179,10 @@ export function PlannerContainer() {
     setIsGenerating(true);
     setError(null);
     try {
-      const res = await generateTripPlanApi(state);
+      const [res] = await Promise.all([
+        generateTripPlanApi(state),
+        new Promise((resolve) => setTimeout(resolve, 600)),
+      ]);
       setPlan(res.plan);
     } catch (err: unknown) {
       const m = err instanceof Error ? err.message : "Trip generation failed.";

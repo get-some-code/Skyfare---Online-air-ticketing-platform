@@ -115,31 +115,84 @@ export interface PlannerGenerateResponse {
   provider: string;
 }
 
+let remotePlannerAvailable: boolean | null = null;
+
+function checkRemoteStatus(): boolean | null {
+  if (typeof window === "undefined") return null;
+  if (remotePlannerAvailable !== null) return remotePlannerAvailable;
+  try {
+    if (sessionStorage.getItem("skyfare_remote_planner_unavailable") === "true") {
+      remotePlannerAvailable = false;
+      return false;
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+function markRemoteUnavailable(): void {
+  remotePlannerAvailable = false;
+  if (typeof window !== "undefined") {
+    try {
+      sessionStorage.setItem("skyfare_remote_planner_unavailable", "true");
+    } catch {
+      // ignore
+    }
+  }
+}
+
 export async function sendPlannerChatApi(
   message: string,
   state: TripState,
 ): Promise<PlannerChatResponse> {
+  // If remote planner is unavailable or cold-starting, respond instantly in 0ms
+  if (checkRemoteStatus() === false) {
+    return localPlannerChatFallback(message, state);
+  }
+
+  // Use a fast timeout (800ms) so users never wait on cold starts, network latency, or 404s
+  const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+  const timeoutId = controller ? setTimeout(() => controller.abort(), 800) : null;
+
   try {
-    return await apiRequest<PlannerChatResponse>("planner/chat", {
+    const res = await apiRequest<PlannerChatResponse>("planner/chat", {
       method: "POST",
       body: JSON.stringify({ message, state }),
+      signal: controller?.signal,
     });
-  } catch (err: unknown) {
-    console.warn("Planner chat API unavailable, engaging local planner engine:", err);
+    remotePlannerAvailable = true;
+    return res;
+  } catch {
+    markRemoteUnavailable();
     return localPlannerChatFallback(message, state);
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
   }
 }
 
 export async function generateTripPlanApi(
   state: TripState,
 ): Promise<PlannerGenerateResponse> {
+  if (checkRemoteStatus() === false) {
+    return localGeneratePlanFallback(state);
+  }
+
+  const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+  const timeoutId = controller ? setTimeout(() => controller.abort(), 2000) : null;
+
   try {
-    return await apiRequest<PlannerGenerateResponse>("planner/generate", {
+    const res = await apiRequest<PlannerGenerateResponse>("planner/generate", {
       method: "POST",
       body: JSON.stringify({ state }),
+      signal: controller?.signal,
     });
-  } catch (err: unknown) {
-    console.warn("Planner generate API unavailable, engaging local planner engine:", err);
+    remotePlannerAvailable = true;
+    return res;
+  } catch {
+    markRemoteUnavailable();
     return localGeneratePlanFallback(state);
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
   }
 }
