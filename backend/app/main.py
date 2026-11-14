@@ -52,6 +52,18 @@ app.add_middleware(
 app.include_router(v1_router, prefix=settings.api_v1_prefix)
 
 
+@app.get("/", tags=["Root"])
+@app.head("/", tags=["Root"])
+async def root():
+    return {
+        "service": "SkyFare Flight Booking & Concierge API",
+        "status": "online",
+        "version": "0.1.0",
+        "docs": "/docs",
+        "health": f"{settings.api_v1_prefix}/health",
+    }
+
+
 @app.exception_handler(ServiceError)
 async def handle_service_error(request: Request, exc: ServiceError) -> JSONResponse:
     error = ErrorResponse(
