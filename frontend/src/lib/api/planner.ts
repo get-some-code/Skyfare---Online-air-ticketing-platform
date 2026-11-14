@@ -1,4 +1,5 @@
-import { apiRequest } from "@/lib/api/client";
+import { ApiError, apiRequest } from "@/lib/api/client";
+import { localGeneratePlanFallback, localPlannerChatFallback } from "./planner-fallback";
 
 export interface OnwardTransport {
   mode: string;
@@ -118,17 +119,39 @@ export async function sendPlannerChatApi(
   message: string,
   state: TripState,
 ): Promise<PlannerChatResponse> {
-  return apiRequest<PlannerChatResponse>("planner/chat", {
-    method: "POST",
-    body: JSON.stringify({ message, state }),
-  });
+  try {
+    return await apiRequest<PlannerChatResponse>("planner/chat", {
+      method: "POST",
+      body: JSON.stringify({ message, state }),
+    });
+  } catch (err: unknown) {
+    // If remote backend returns 404 (e.g. backend service on Render is on main branch without planner endpoints)
+    if (err instanceof ApiError && err.status === 404) {
+      return localPlannerChatFallback(message, state);
+    }
+    // Also catch network errors or missing endpoints
+    if (err instanceof TypeError && err.message.toLowerCase().includes("fetch")) {
+      return localPlannerChatFallback(message, state);
+    }
+    throw err;
+  }
 }
 
 export async function generateTripPlanApi(
   state: TripState,
 ): Promise<PlannerGenerateResponse> {
-  return apiRequest<PlannerGenerateResponse>("planner/generate", {
-    method: "POST",
-    body: JSON.stringify({ state }),
-  });
+  try {
+    return await apiRequest<PlannerGenerateResponse>("planner/generate", {
+      method: "POST",
+      body: JSON.stringify({ state }),
+    });
+  } catch (err: unknown) {
+    if (err instanceof ApiError && err.status === 404) {
+      return localGeneratePlanFallback(state);
+    }
+    if (err instanceof TypeError && err.message.toLowerCase().includes("fetch")) {
+      return localGeneratePlanFallback(state);
+    }
+    throw err;
+  }
 }
