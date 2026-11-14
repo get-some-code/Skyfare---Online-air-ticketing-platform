@@ -142,14 +142,15 @@ MANDATORY RULES:
    - For example in Manali: Atal Tunnel, Solang Valley, Jogini Waterfalls, Hadimba Temple, Rohtang Pass, Naggar Castle.
    - For Germany: Neuschwanstein Castle, Marienplatz, Black Forest B500, Rhine Gorge.
 4. ZERO generic filler (do not write "explore local culture" or "stroll the market"). State exact activities and durations.
-5. FOOD RECOMMENDATIONS: Name 2 to 4 existing, well-known restaurants or cafes with cuisine, whether veg-friendly is true, and approximate cost per person in INR.
-6. INDIAN TRAVELLER MODE (Always On):
+5. DISTINCT ITINERARY DAYS: Every single day in the itinerary MUST be unique, varied, and distinct. NEVER repeat the same places, activities, or day titles across multiple days. Each day must explore completely different attractions, scenic corridors, cultural sites, and dining venues.
+6. FOOD RECOMMENDATIONS: Name 2 to 4 existing, well-known restaurants or cafes with cuisine, whether veg-friendly is true, and approximate cost per person in INR.
+7. INDIAN TRAVELLER MODE (Always On):
    - For international trips: Indian passport visa requirements, forex and card tips (Niyo/Forex card, cash ratio), SIM/eSIM, plug/socket type, vegetarian/Jain food availability, safety/scam tips.
    - For domestic trips: Inner Line Permits/Green Cess, altitude and acclimatisation guidance, network coverage (Jio/Airtel postpaid vs prepaid), ATMs, fuel availability, road conditions.
-7. BUDGET TABLE: Must include Low, Medium, and High breakdowns across local_travel, stay, food, sightseeing, activities, misc, and total in INR, plus approximate roundtrip flight cost in INR.
-8. RESPECT USER CONSTRAINTS: Exactly match the user's requested number of days, food preference (highlight veg/Jain), budget level, and travel pace.
-9. DISCLAIMER: Always end with the disclaimer that details are AI-generated estimates and user should verify opening hours, permits, visa rules, and prices.
-10. RETURN VALID RAW JSON ONLY complying exactly with the requested schema.
+8. BUDGET TABLE: Must include Low, Medium, and High breakdowns across local_travel, stay, food, sightseeing, activities, misc, and total in INR, plus approximate roundtrip flight cost in INR.
+9. RESPECT USER CONSTRAINTS: Exactly match the user's requested number of days, food preference (highlight veg/Jain), budget level, and travel pace.
+10. DISCLAIMER: Always end with the disclaimer that details are AI-generated estimates and user should verify opening hours, permits, visa rules, and prices.
+11. RETURN VALID RAW JSON ONLY complying exactly with the requested schema.
 """
 
 

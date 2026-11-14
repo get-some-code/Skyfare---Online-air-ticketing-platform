@@ -275,6 +275,36 @@ export function PlannerResultView({
         {/* Sidebar Sticky Panel: Budget Breakdown & Flight Search */}
         <aside className="planner-result-sidebar">
           <div className="planner-sticky-panel">
+            {/* Trip at a Glance Card */}
+            <div className="planner-glance-card">
+              <div className="planner-glance-card__header">
+                <Icon name="compass" size={18} />
+                <h3>Trip at a Glance</h3>
+              </div>
+              <div className="planner-glance-list">
+                <div className="planner-glance-item">
+                  <span>Destination:</span>
+                  <strong>{destination}</strong>
+                </div>
+                <div className="planner-glance-item">
+                  <span>Duration:</span>
+                  <strong>{plan.days.length} Days Itinerary</strong>
+                </div>
+                <div className="planner-glance-item">
+                  <span>Recommended Hub:</span>
+                  <strong>{plan.arrival.recommended.split(" ")[0]} ({plan.flight_search.destination_iata})</strong>
+                </div>
+                <div className="planner-glance-item">
+                  <span>Flight Sector:</span>
+                  <strong>{plan.flight_search.origin_iata} ⇄ {plan.flight_search.destination_iata}</strong>
+                </div>
+                <div className="planner-glance-item">
+                  <span>Best Season:</span>
+                  <strong>{plan.best_time}</strong>
+                </div>
+              </div>
+            </div>
+
             {/* Budget Table */}
             <div className="planner-budget-card">
               <div className="planner-budget-card__header">
@@ -348,6 +378,19 @@ export function PlannerResultView({
                 Search Flights for this Trip
                 <Icon name="arrow-right" size={16} />
               </Link>
+            </div>
+
+            {/* 24/7 Aviation Concierge Note */}
+            <div className="planner-concierge-card">
+              <span className="planner-concierge-card__icon" aria-hidden="true">
+                <Icon name="support" size={18} />
+              </span>
+              <div className="planner-concierge-card__text">
+                <strong>24/7 Flight Support &amp; Concierge</strong>
+                <p>
+                  Need bespoke routing, baggage guidance, or corporate group bookings? SkyBot and our support team are available 24/7.
+                </p>
+              </div>
             </div>
 
             {/* Disclaimer */}

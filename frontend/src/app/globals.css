@@ -5872,7 +5872,7 @@ select:focus-visible {
   min-height: 100vh;
   position: relative;
   background: #f8fafc;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 .planner-page-wrapper {
@@ -6240,6 +6240,9 @@ select:focus-visible {
   display: flex;
   flex-direction: column;
   gap: 32px;
+  max-width: 1360px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .planner-result-header {
@@ -6305,9 +6308,16 @@ select:focus-visible {
 
 .planner-result-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 360px;
-  gap: 28px;
+  grid-template-columns: minmax(0, 1fr) 400px;
+  gap: 32px;
   align-items: flex-start;
+}
+
+@media (min-width: 1400px) {
+  .planner-result-grid {
+    grid-template-columns: minmax(0, 1fr) 420px;
+    gap: 36px;
+  }
 }
 
 .planner-result-main {
@@ -6712,6 +6722,88 @@ select:focus-visible {
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+.planner-glance-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 22px 24px;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.04);
+}
+
+.planner-glance-card__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #0d5edb;
+}
+
+.planner-glance-card__header h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0b2545;
+  margin: 0;
+}
+
+.planner-glance-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.planner-glance-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #64748b;
+  gap: 12px;
+}
+
+.planner-glance-item strong {
+  color: #0f172a;
+  text-align: right;
+  font-weight: 600;
+}
+
+.planner-concierge-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px 18px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.planner-concierge-card__icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #e0f2fe;
+  color: #0284c7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.planner-concierge-card__text strong {
+  display: block;
+  font-size: 13px;
+  color: #0b2545;
+  margin-bottom: 3px;
+}
+
+.planner-concierge-card__text p {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.45;
+  margin: 0;
 }
 
 .planner-budget-card {
