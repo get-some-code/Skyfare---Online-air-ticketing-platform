@@ -34,10 +34,42 @@ export function PlannerContainer() {
     dates_or_month: paramDepart ? `${paramDepart}${paramReturn ? ` to ${paramReturn}` : ""}` : null,
   }));
 
-  const [question, setQuestion] = useState<string | null>(null);
-  const [chips, setChips] = useState<string[]>([]);
-  const [progressPercent, setProgressPercent] = useState(15);
-  const [isReadyToGenerate, setIsReadyToGenerate] = useState(false);
+  const [question, setQuestion] = useState<string | null>(() => {
+    if (paramDest) {
+      if (paramOrigin && !paramDays) {
+        return `How many days are you planning for your ${paramDest} trip?`;
+      }
+      if (paramOrigin && paramDays) {
+        return `Your trip outline to ${paramDest} is ready. Would you like to build your complete day-by-day itinerary and itemized INR budget now?`;
+      }
+      return `Which city will you be departing from for ${paramDest}?`;
+    }
+    return "Where would you like to travel?";
+  });
+
+  const [chips, setChips] = useState<string[]>(() => {
+    if (paramDest) {
+      if (paramOrigin && !paramDays) {
+        return ["3 Days", "5 Days", "7 Days", "10 Days"];
+      }
+      if (paramOrigin && paramDays) {
+        return ["Generate Trip Plan", "Relaxed Pace", "Vegetarian Food", "Solo Trip"];
+      }
+      return ["Kolkata", "New Delhi", "Mumbai", "Bengaluru", "Chennai"];
+    }
+    return ["Manali", "Germany", "Goa", "Leh Ladakh", "Switzerland", "Dubai"];
+  });
+
+  const [progressPercent, setProgressPercent] = useState(() => {
+    if (paramDest && paramOrigin && paramDays) return 100;
+    if (paramDest && paramOrigin) return 60;
+    if (paramDest) return 35;
+    return 15;
+  });
+
+  const [isReadyToGenerate, setIsReadyToGenerate] = useState(() => {
+    return Boolean(paramDest && paramOrigin && paramDays);
+  });
 
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -57,39 +89,39 @@ export function PlannerContainer() {
   // 2. Initialize first turn when destination is prefilled
   const initializedRef = useRef(false);
   useEffect(() => {
-    if (!isAuthenticated || plan || question || initializedRef.current) return;
+    if (!isAuthenticated || plan || initializedRef.current) return;
     initializedRef.current = true;
     let ignore = false;
 
-    sendPlannerChatApi(paramDest || "Start trip plan", {
-      destination: paramDest || null,
-      origin_city: paramOrigin || null,
-      days: paramDays || null,
-    })
-      .then((res) => {
-        if (!ignore) {
-          setState(res.state);
-          setQuestion(res.question);
-          setChips(res.chips);
-          setProgressPercent(res.progress_percent);
-          setIsReadyToGenerate(res.is_ready_to_generate);
-        }
+    if (paramDest) {
+      sendPlannerChatApi(paramDest, {
+        destination: paramDest,
+        origin_city: paramOrigin || null,
+        days: paramDays || null,
       })
-      .catch((err: unknown) => {
-        if (!ignore) {
-          const msg = err instanceof Error ? err.message : "Failed to connect to trip planner.";
-          if (msg.includes("429") || msg.toLowerCase().includes("rate limit")) {
-            setRateLimitExceeded(true);
-          } else {
-            setError(msg);
+        .then((res) => {
+          if (!ignore) {
+            setState(res.state);
+            setQuestion(res.question);
+            setChips(res.chips);
+            setProgressPercent(res.progress_percent);
+            setIsReadyToGenerate(res.is_ready_to_generate);
           }
-        }
-      });
+        })
+        .catch((err: unknown) => {
+          if (!ignore) {
+            const msg = err instanceof Error ? err.message : "Failed to connect to trip planner.";
+            if (msg.includes("429") || msg.toLowerCase().includes("rate limit")) {
+              setRateLimitExceeded(true);
+            }
+          }
+        });
+    }
 
     return () => {
       ignore = true;
     };
-  }, [isAuthenticated, plan, question, paramDest, paramOrigin, paramDays]);
+  }, [isAuthenticated, plan, paramDest, paramOrigin, paramDays]);
 
   const initTurn = useCallback(async (initialDestination?: string) => {
     if (!isAuthenticated) return;
@@ -164,13 +196,12 @@ export function PlannerContainer() {
   function handleReset() {
     setState({});
     setPlan(null);
-    setQuestion(null);
-    setChips([]);
-    setProgressPercent(10);
+    setQuestion("Where would you like to travel?");
+    setChips(["Manali", "Germany", "Goa", "Leh Ladakh", "Switzerland", "Dubai"]);
+    setProgressPercent(15);
     setIsReadyToGenerate(false);
     setError(null);
     setRateLimitExceeded(false);
-    initTurn("Plan a new trip");
   }
 
   function handleEditField(field: keyof TripState) {

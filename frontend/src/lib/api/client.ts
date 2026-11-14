@@ -18,6 +18,7 @@ export class ApiError extends Error {
   ) {
     super(payload.message ?? fallbackMessage);
     this.name = "ApiError";
+    Object.setPrototypeOf(this, ApiError.prototype);
     this.status = status;
     this.code = payload.code ?? "http_error";
     this.requestId = payload.request_id;

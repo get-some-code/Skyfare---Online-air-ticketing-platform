@@ -1,4 +1,4 @@
-import { ApiError, apiRequest } from "@/lib/api/client";
+import { apiRequest } from "@/lib/api/client";
 import { localGeneratePlanFallback, localPlannerChatFallback } from "./planner-fallback";
 
 export interface OnwardTransport {
@@ -125,15 +125,8 @@ export async function sendPlannerChatApi(
       body: JSON.stringify({ message, state }),
     });
   } catch (err: unknown) {
-    // If remote backend returns 404 (e.g. backend service on Render is on main branch without planner endpoints)
-    if (err instanceof ApiError && err.status === 404) {
-      return localPlannerChatFallback(message, state);
-    }
-    // Also catch network errors or missing endpoints
-    if (err instanceof TypeError && err.message.toLowerCase().includes("fetch")) {
-      return localPlannerChatFallback(message, state);
-    }
-    throw err;
+    console.warn("Planner chat API unavailable, engaging local planner engine:", err);
+    return localPlannerChatFallback(message, state);
   }
 }
 
@@ -146,12 +139,7 @@ export async function generateTripPlanApi(
       body: JSON.stringify({ state }),
     });
   } catch (err: unknown) {
-    if (err instanceof ApiError && err.status === 404) {
-      return localGeneratePlanFallback(state);
-    }
-    if (err instanceof TypeError && err.message.toLowerCase().includes("fetch")) {
-      return localGeneratePlanFallback(state);
-    }
-    throw err;
+    console.warn("Planner generate API unavailable, engaging local planner engine:", err);
+    return localGeneratePlanFallback(state);
   }
 }
