@@ -231,3 +231,59 @@ test("SkyBot floating robot avatar opens and introduces her luxury aviation conc
   // Return to homepage
   await page.goto("/");
 });
+
+test("mobile flight search allows searching places and suggests international airports cleanly", async ({
+  page,
+}) => {
+  // Set mobile viewport
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+
+  const departurePlaceBtn = page.getByRole("button", {
+    name: "Search departure places and international airports",
+  });
+  await expect(departurePlaceBtn).toBeVisible();
+
+  // Open Airport Search Modal
+  await departurePlaceBtn.click();
+  const airportModal = page.getByRole("dialog", {
+    name: /Select Departure Airport/i,
+  });
+  await expect(airportModal).toBeVisible();
+
+  // Test place search: e.g. London
+  const searchInput = page.getByPlaceholder(
+    /Search place, city, country, or code/i,
+  );
+  await searchInput.fill("London");
+
+  // Verify international London airports are suggested (LHR, LGW)
+  const lhrOption = airportModal.getByRole("button", { name: /Heathrow Airport/i });
+  await expect(lhrOption).toBeVisible();
+
+  // Select LHR
+  await lhrOption.click();
+  await expect(airportModal).not.toBeVisible();
+
+  const originInput = page.getByRole("combobox", { name: "Departure city" });
+  await expect(originInput).toHaveValue("LHR - London");
+
+  // Test Destination place search: e.g. Tokyo
+  const destPlaceBtn = page.getByRole("button", {
+    name: "Search destination places and international airports",
+  });
+  await destPlaceBtn.click();
+  const destModal = page.getByRole("dialog", {
+    name: /Select Destination Airport/i,
+  });
+  await expect(destModal).toBeVisible();
+
+  await destModal.getByPlaceholder(/Search place, city, country, or code/i).fill("Tokyo");
+  const hndOption = destModal.getByRole("button", { name: /Tokyo Haneda Airport/i });
+  await expect(hndOption).toBeVisible();
+  await hndOption.click();
+  await expect(destModal).not.toBeVisible();
+
+  const destInput = page.getByRole("combobox", { name: "Destination city" });
+  await expect(destInput).toHaveValue("HND - Tokyo");
+});

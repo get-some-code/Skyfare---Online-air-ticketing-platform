@@ -1,3 +1,5 @@
+import { ALL_AIRPORTS } from "./airports-catalog";
+
 export type DestinationCategory =
   | "Domestic Hubs"
   | "International Charters"
@@ -26,14 +28,11 @@ export interface BenefitFixture {
   icon: "badge" | "spark" | "receipt" | "support";
 }
 
-export const airports: AirportFixture[] = [
-  { code: "CCU", city: "Kolkata", airport: "Netaji Subhash Chandra Bose Intl" },
-  { code: "DEL", city: "New Delhi", airport: "Indira Gandhi International" },
-  { code: "BOM", city: "Mumbai", airport: "Chhatrapati Shivaji Maharaj Intl" },
-  { code: "BLR", city: "Bengaluru", airport: "Kempegowda International" },
-  { code: "GOI", city: "Goa", airport: "Manohar International" },
-  { code: "DXB", city: "Dubai", airport: "Dubai International Airport" },
-];
+export const airports: AirportFixture[] = ALL_AIRPORTS.map((a) => ({
+  code: a.code,
+  city: a.city,
+  airport: a.airport,
+}));
 
 export const destinations: DestinationFixture[] = [
   {

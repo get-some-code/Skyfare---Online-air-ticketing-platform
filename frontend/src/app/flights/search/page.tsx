@@ -9,6 +9,7 @@ import { useCurrency } from "@/components/site/currency-context";
 import { Icon } from "@/components/ui/icon";
 import { apiRequest } from "@/lib/api/client";
 import type { FlightOffer, SearchResponse } from "@/lib/api/types";
+import { AIRPORT_LOOKUP } from "@/features/homepage/data/airports-catalog";
 
 export default function SearchPage() {
   return (
@@ -515,8 +516,8 @@ function FlightSearchWaitingState({
     return () => clearInterval(timer);
   }, []);
 
-  const originCity = AIRPORT_CITIES[origin] ?? origin;
-  const destCity = AIRPORT_CITIES[destination] ?? destination;
+  const originCity = AIRPORT_LOOKUP[origin]?.city ?? AIRPORT_CITIES[origin] ?? origin;
+  const destCity = AIRPORT_LOOKUP[destination]?.city ?? AIRPORT_CITIES[destination] ?? destination;
 
   return (
     <div className="search-waiting-container" aria-live="polite">

@@ -31,7 +31,7 @@ const FLEET_SLIDES: FleetSlide[] = [
   {
     src: "/images/fleet-private-jet.jpg",
     title: "Executive Corporate Jet Charters",
-    caption: "Handcrafted mahogany conference saloons, bespoke private catering & discreet VIP terminal boarding",
+    caption: "Handcrafted mahogany conference saloons, bespoke private catering & VIP terminal boarding",
     category: "Private Jet Cabin",
     tag: "Corporate Charter",
   },
@@ -103,7 +103,7 @@ export function FleetShowcase() {
       <div className="hero-fleet-banner__overlay">
         <div className="hero-fleet-banner__meta">
           <span className="hero-fleet-banner__tag">
-            <Icon name="plane" size={14} />
+            <Icon name="plane" size={13} />
             {currentSlide.tag}
           </span>
           <span className="hero-fleet-banner__count">
@@ -112,11 +112,11 @@ export function FleetShowcase() {
         </div>
 
         <h3 className="hero-fleet-banner__heading">{currentSlide.title}</h3>
-        <span className="hero-fleet-banner__caption">{currentSlide.caption}</span>
+        <p className="hero-fleet-banner__caption">{currentSlide.caption}</p>
 
         {/* Thumbnail Navigation Pills */}
         <div className="hero-fleet-banner__controls">
-          <div className="hero-fleet-banner__pills">
+          <div className="hero-fleet-banner__pills" role="tablist" aria-label="Fleet categories">
             {FLEET_SLIDES.map((slide, idx) => (
               <button
                 key={slide.category}
