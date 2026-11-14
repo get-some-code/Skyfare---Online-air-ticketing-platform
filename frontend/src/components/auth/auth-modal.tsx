@@ -198,7 +198,7 @@ export function AuthModal() {
                 required
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="Captain John Smith"
+                placeholder="John Doe"
                 autoComplete="name"
                 autoFocus
               />

@@ -198,7 +198,7 @@ export function BookingModal({ flight, onClose, onSuccess }: BookingModalProps) 
                   required
                   value={passengerName}
                   onChange={(e) => setPassengerName(e.target.value)}
-                  placeholder="e.g. Captain Monideep Mukherjee"
+                  placeholder="e.g. John Doe"
                   autoFocus
                 />
               </label>
