@@ -2492,6 +2492,292 @@ select:focus-visible {
   line-height: 1.6;
 }
 
+/* ─── Instant Flight Search Waiting State & Radar ─── */
+.search-waiting-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.search-live-radar-card {
+  position: relative;
+  background: linear-gradient(135deg, #0b1f3a 0%, #0f2744 55%, #081a30 100%);
+  border: 1px solid rgba(80, 140, 220, 0.28);
+  border-radius: 20px;
+  padding: clamp(20px, 3vw, 32px);
+  color: white;
+  box-shadow: 0 16px 44px rgba(0, 21, 42, 0.22);
+  overflow: hidden;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.search-live-radar-card::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 50% 30%, rgba(4, 84, 213, 0.15), transparent 60%);
+  pointer-events: none;
+}
+
+.search-live-radar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  z-index: 1;
+}
+
+.search-radar-airport {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  min-width: 90px;
+}
+
+.search-radar-airport--dest {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.search-radar-city {
+  font-size: 13px;
+  color: #9cb5d3;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.search-radar-code {
+  font-size: clamp(26px, 3.5vw, 36px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.search-radar-corridor {
+  flex: 1;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+}
+
+.search-radar-line {
+  position: relative;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.15) 0%, rgba(79, 143, 247, 0.6) 50%, rgba(255, 255, 255, 0.15) 100%);
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+}
+
+.search-radar-plane-icon {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: #38bdf8;
+  filter: drop-shadow(0 0 6px #38bdf8);
+  animation: radarPlaneFly 3s infinite ease-in-out;
+}
+
+@keyframes radarPlaneFly {
+  0% { left: 5%; transform: translateY(-50%) rotate(0deg); opacity: 0.7; }
+  50% { left: 48%; transform: translateY(-50%) rotate(0deg); opacity: 1; }
+  100% { left: 90%; transform: translateY(-50%) rotate(0deg); opacity: 0.7; }
+}
+
+.search-radar-pulse-dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7);
+  animation: pulseDot 1.8s infinite cubic-bezier(0.66, 0, 0, 1);
+}
+
+@keyframes pulseDot {
+  to { box-shadow: 0 0 0 16px rgba(56, 189, 248, 0); }
+}
+
+.search-radar-flight-tag {
+  font-size: 11px;
+  color: #7fa4cd;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.search-live-radar__body {
+  position: relative;
+  z-index: 1;
+  padding-top: 20px;
+}
+
+.search-radar-status-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.search-radar-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(255, 255, 255, 0.15);
+  border-top-color: #38bdf8;
+  border-radius: 50%;
+  animation: spinRadar 0.9s linear infinite;
+  flex: 0 0 auto;
+}
+
+@keyframes spinRadar {
+  to { transform: rotate(360deg); }
+}
+
+.search-radar-title {
+  font-size: clamp(18px, 2.2vw, 22px);
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 4px;
+  letter-spacing: -0.02em;
+}
+
+.search-radar-subtitle {
+  font-size: 13px;
+  color: #a4c0e0;
+  margin: 0;
+}
+
+.search-radar-subtitle strong {
+  color: #ffffff;
+}
+
+.search-radar-dynamic-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(14, 38, 66, 0.65);
+  border: 1px solid rgba(79, 143, 247, 0.22);
+  border-radius: 12px;
+  padding: 10px 16px;
+  margin: 14px 0 16px;
+  min-height: 44px;
+}
+
+.search-radar-dynamic-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 8px #22c55e;
+  flex: 0 0 auto;
+}
+
+.search-radar-dynamic-msg {
+  font-size: 14px;
+  color: #dbeafe;
+  margin: 0;
+  animation: fadeInMsg 0.35s ease;
+}
+
+@keyframes fadeInMsg {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.search-radar-progress-bar {
+  position: relative;
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+
+.search-radar-progress-fill {
+  position: absolute;
+  height: 100%;
+  width: 50%;
+  background: linear-gradient(90deg, #0ea5e9, #38bdf8, #60a5fa);
+  border-radius: 999px;
+  animation: progressIndeterminate 1.6s infinite ease-in-out;
+}
+
+@keyframes progressIndeterminate {
+  0% { left: -50%; width: 30%; }
+  50% { left: 25%; width: 60%; }
+  100% { left: 100%; width: 40%; }
+}
+
+.search-radar-badges {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.search-radar-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #bfdbfe;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.search-spin-icon {
+  animation: spinIcon 1s linear infinite;
+}
+
+@keyframes spinIcon {
+  to { transform: rotate(360deg); }
+}
+
+.button--search.is-searching {
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .search-live-radar__header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .search-radar-airport--dest {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .search-radar-corridor {
+    max-width: 100%;
+    padding: 6px 0;
+  }
+}
+
 @media (max-width: 1180px) {
   .site-header__inner {
     width: min(100% - 40px, var(--content-width));

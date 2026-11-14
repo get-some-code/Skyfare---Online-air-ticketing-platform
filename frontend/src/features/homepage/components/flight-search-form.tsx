@@ -42,6 +42,7 @@ export function FlightSearchForm({
   const [corporateTravel, setCorporateTravel] = useState(false);
   const [travellerPickerOpen, setTravellerPickerOpen] = useState(false);
   const [today, setToday] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
   const travellerPickerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -62,6 +63,7 @@ export function FlightSearchForm({
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setIsSearching(true);
     const params = new URLSearchParams({
       tripType,
       origin: airportCode(origin),
@@ -344,9 +346,13 @@ export function FlightSearchForm({
               <span>Corporate travel</span>
             </label>
           </div>
-          <button className="button button--primary button--search" type="submit">
-            <Icon name="search" size={20} />
-            Search Flights
+          <button
+            className={`button button--primary button--search${isSearching ? " is-searching" : ""}`}
+            type="submit"
+            disabled={isSearching}
+          >
+            <Icon name="search" size={20} className={isSearching ? "search-spin-icon" : ""} />
+            {isSearching ? "Locating Flights…" : "Search Flights"}
           </button>
         </div>
       </div>

@@ -116,7 +116,7 @@ def _query_serpapi(criteria: SearchCriteria) -> list[dict[str, Any]]:
 
     req = urllib.request.Request(url, headers={"User-Agent": "SkyFare/1.0"})
     try:
-        with urllib.request.urlopen(req, timeout=12) as response:
+        with urllib.request.urlopen(req, timeout=6) as response:
             payload = json.loads(response.read().decode("utf-8"))
     except Exception as exc:
         logger.warning("SerpAPI request error: %s", exc)
@@ -150,7 +150,7 @@ def _query_aviationstack(criteria: SearchCriteria) -> list[dict[str, Any]]:
 
     req = urllib.request.Request(url, headers={"User-Agent": "SkyFare/1.0"})
     try:
-        with urllib.request.urlopen(req, timeout=10) as response:
+        with urllib.request.urlopen(req, timeout=5) as response:
             payload = json.loads(response.read().decode("utf-8"))
     except Exception as exc:
         logger.warning("AviationStack request error: %s", exc)

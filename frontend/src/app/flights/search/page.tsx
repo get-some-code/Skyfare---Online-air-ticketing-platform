@@ -335,33 +335,14 @@ function SearchResultsContent() {
             </div>
           )}
 
-          {/* Loading Skeletons */}
+          {/* Live Radar Waiting State while Fetching Flights */}
           {loading ? (
-            <div className="search-results-list" aria-label="Flight results loading">
-              {[1, 2, 3, 4].map((n) => (
-                <div key={n} className="flight-card flight-card--skeleton" aria-hidden="true">
-                  <div className="flight-card__airline">
-                    <div className="skeleton skeleton--square" />
-                    <div>
-                      <div className="skeleton skeleton--text skeleton--text-sm" />
-                      <div className="skeleton skeleton--text skeleton--text-xs" />
-                    </div>
-                  </div>
-                  <div className="flight-card__times">
-                    <div className="skeleton skeleton--text skeleton--text-lg" />
-                    <div className="flight-card__duration-line">
-                      <div className="skeleton skeleton--line" />
-                    </div>
-                    <div className="skeleton skeleton--text skeleton--text-lg" />
-                  </div>
-                  <div className="flight-card__price-block">
-                    <div className="skeleton skeleton--text skeleton--text-xs" />
-                    <div className="skeleton skeleton--text skeleton--text-price" />
-                    <div className="skeleton skeleton--btn" />
-                  </div>
-                </div>
-              ))}
-            </div>
+            <FlightSearchWaitingState
+              origin={origin}
+              destination={destination}
+              formattedDeparture={formattedDeparture}
+              cabin={cabinParam}
+            />
           ) : filteredFlights.length === 0 ? (
             <div className="search-results-empty">
               <Icon name="plane" size={32} />
@@ -487,6 +468,152 @@ function SearchResultsContent() {
         onClose={() => setSelectedFlight(null)}
       />
     </>
+  );
+}
+
+const WAITING_MESSAGES = [
+  "Connecting to global airline distribution systems (GDS) & live commercial inventory…",
+  "Scanning real-time seat availability across 500+ commercial carriers & charters…",
+  "Comparing lowest fare brackets, GST input tax credits, and baggage allowances…",
+  "Locking in executive schedules and guaranteed real-time availability…",
+];
+
+const AIRPORT_CITIES: Record<string, string> = {
+  DEL: "New Delhi",
+  CCU: "Kolkata",
+  BOM: "Mumbai",
+  BLR: "Bengaluru",
+  MAA: "Chennai",
+  HYD: "Hyderabad",
+  GOI: "Goa",
+  DXB: "Dubai",
+  AMD: "Ahmedabad",
+  PNQ: "Pune",
+  COK: "Kochi",
+  JAI: "Jaipur",
+};
+
+interface FlightSearchWaitingStateProps {
+  origin: string;
+  destination: string;
+  formattedDeparture: string;
+  cabin: string;
+}
+
+function FlightSearchWaitingState({
+  origin,
+  destination,
+  formattedDeparture,
+  cabin,
+}: FlightSearchWaitingStateProps) {
+  const [msgIdx, setMsgIdx] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setMsgIdx((prev) => (prev + 1) % WAITING_MESSAGES.length);
+    }, 1800);
+    return () => clearInterval(timer);
+  }, []);
+
+  const originCity = AIRPORT_CITIES[origin] ?? origin;
+  const destCity = AIRPORT_CITIES[destination] ?? destination;
+
+  return (
+    <div className="search-waiting-container" aria-live="polite">
+      {/* Prominent Live Radar Waiting Card */}
+      <div className="search-live-radar-card">
+        <div className="search-live-radar__header">
+          <div className="search-radar-airport">
+            <span className="search-radar-city">{originCity}</span>
+            <strong className="search-radar-code">{origin}</strong>
+          </div>
+
+          <div className="search-radar-corridor">
+            <div className="search-radar-line">
+              <span className="search-radar-plane-icon" aria-hidden="true">
+                ✈
+              </span>
+              <div className="search-radar-pulse-dot" />
+            </div>
+            <span className="search-radar-flight-tag">
+              Scanning Executive & Commercial Corridors
+            </span>
+          </div>
+
+          <div className="search-radar-airport search-radar-airport--dest">
+            <span className="search-radar-city">{destCity}</span>
+            <strong className="search-radar-code">{destination}</strong>
+          </div>
+        </div>
+
+        <div className="search-live-radar__body">
+          <div className="search-radar-status-head">
+            <div className="search-radar-spinner" aria-hidden="true" />
+            <div>
+              <h3 className="search-radar-title">
+                Retrieving Live Flight Availability
+              </h3>
+              <p className="search-radar-subtitle">
+                Searching flights for <strong>{origin} → {destination}</strong> on <strong>{formattedDeparture}</strong> ({cabin})
+              </p>
+            </div>
+          </div>
+
+          <div className="search-radar-dynamic-box">
+            <span className="search-radar-dynamic-dot" />
+            <p className="search-radar-dynamic-msg" key={msgIdx}>
+              {WAITING_MESSAGES[msgIdx]}
+            </p>
+          </div>
+
+          <div className="search-radar-progress-bar" role="progressbar" aria-label="Searching live flights">
+            <div className="search-radar-progress-fill" />
+          </div>
+
+          <div className="search-radar-badges">
+            <span className="search-radar-pill">
+              <Icon name="spark" size={13} />
+              Live Google Flights Inventory
+            </span>
+            <span className="search-radar-pill">
+              <Icon name="receipt" size={13} />
+              18% GST Invoicing Included
+            </span>
+            <span className="search-radar-pill">
+              <Icon name="badge" size={13} />
+              Zero Hidden Surcharges
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Shimmering Flight Cards Skeleton while waiting */}
+      <div className="search-results-list" aria-label="Flight results loading">
+        {[1, 2, 3].map((n) => (
+          <div key={n} className="flight-card flight-card--skeleton" aria-hidden="true">
+            <div className="flight-card__airline">
+              <div className="skeleton skeleton--square" />
+              <div>
+                <div className="skeleton skeleton--text skeleton--text-sm" />
+                <div className="skeleton skeleton--text skeleton--text-xs" />
+              </div>
+            </div>
+            <div className="flight-card__times">
+              <div className="skeleton skeleton--text skeleton--text-lg" />
+              <div className="flight-card__duration-line">
+                <div className="skeleton skeleton--line" />
+              </div>
+              <div className="skeleton skeleton--text skeleton--text-lg" />
+            </div>
+            <div className="flight-card__price-block">
+              <div className="skeleton skeleton--text skeleton--text-xs" />
+              <div className="skeleton skeleton--text skeleton--text-price" />
+              <div className="skeleton skeleton--btn" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
