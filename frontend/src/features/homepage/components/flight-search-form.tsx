@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 
 import { Icon } from "@/components/ui/icon";
 import { airports } from "@/features/homepage/data/homepage-fixtures";
@@ -9,6 +9,7 @@ import {
   ALL_AIRPORTS,
   AirportItem,
   getAirportByCode,
+  searchAirports,
 } from "../data/airports-catalog";
 import { AirportSearchModal } from "./airport-search-modal";
 
@@ -52,7 +53,43 @@ export function FlightSearchForm({
   const [searchModalField, setSearchModalField] = useState<
     "origin" | "destination" | "via" | null
   >(null);
+  const [activeSuggestField, setActiveSuggestField] = useState<
+    "origin" | "destination" | "via" | null
+  >(null);
+
   const travellerPickerRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  // Automatically reset searching state when returning via browser back/forward (bfcache)
+  useEffect(() => {
+    const handleReset = () => setIsSearching(false);
+    window.addEventListener("pageshow", handleReset);
+    window.addEventListener("popstate", handleReset);
+    return () => {
+      window.removeEventListener("pageshow", handleReset);
+      window.removeEventListener("popstate", handleReset);
+    };
+  }, []);
+
+  // Handle outside click & escape to close inline suggestions dropdown
+  useEffect(() => {
+    function handlePointerDown(e: MouseEvent) {
+      if (formRef.current && !formRef.current.contains(e.target as Node)) {
+        setActiveSuggestField(null);
+      }
+    }
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setActiveSuggestField(null);
+      }
+    }
+    document.addEventListener("mousedown", handlePointerDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   useEffect(() => {
     if (!travellerPickerOpen) return;
@@ -72,7 +109,14 @@ export function FlightSearchForm({
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setActiveSuggestField(null);
     setIsSearching(true);
+
+    // Safety timeout in case navigation is interrupted or user navigates back
+    setTimeout(() => {
+      setIsSearching(false);
+    }, 4000);
+
     const params = new URLSearchParams({
       tripType,
       origin: airportCode(origin),
@@ -111,6 +155,21 @@ export function FlightSearchForm({
     setSearchModalField(null);
   }
 
+  function handleSelectInlineSuggestion(
+    airport: AirportItem,
+    field: "origin" | "destination" | "via",
+  ) {
+    const formatted = `${airport.code} - ${airport.city}`;
+    if (field === "origin") {
+      setOrigin(formatted);
+    } else if (field === "destination") {
+      handleDestinationChange(formatted);
+    } else if (field === "via") {
+      setVia(formatted);
+    }
+    setActiveSuggestField(null);
+  }
+
   const originAirport =
     getAirportByCode(origin) ??
     airports.find((airport) => airport.code === airportCode(origin));
@@ -126,9 +185,24 @@ export function FlightSearchForm({
       airports.find((airport) => airport.code === airportCode(via))
     : undefined;
 
+  // Real-time suggestions for the currently focused/typed field
+  const currentQuery =
+    activeSuggestField === "origin"
+      ? origin
+      : activeSuggestField === "destination"
+      ? selectedDestination
+      : activeSuggestField === "via"
+      ? via
+      : "";
+
+  const inlineSuggestions = useMemo(() => {
+    if (!activeSuggestField || !currentQuery.trim()) return [];
+    return searchAirports(currentQuery).slice(0, 6);
+  }, [activeSuggestField, currentQuery]);
+
   return (
     <>
-      <form className="flight-search" onSubmit={handleSubmit}>
+      <form ref={formRef} className="flight-search" onSubmit={handleSubmit}>
         <div className="flight-search__top">
           <div className="trip-tabs" role="group" aria-label="Trip type">
             {(
@@ -175,7 +249,10 @@ export function FlightSearchForm({
                 <button
                   type="button"
                   className="search-field__place-btn"
-                  onClick={() => setSearchModalField("origin")}
+                  onClick={() => {
+                    setActiveSuggestField(null);
+                    setSearchModalField("origin");
+                  }}
                   aria-label="Search departure places and international airports"
                 >
                   <Icon name="search" size={11} />
@@ -187,7 +264,11 @@ export function FlightSearchForm({
                   list="skyfare-airports"
                   name="origin"
                   value={origin}
-                  onChange={(event) => setOrigin(event.target.value)}
+                  onFocus={() => setActiveSuggestField("origin")}
+                  onChange={(event) => {
+                    setOrigin(event.target.value);
+                    setActiveSuggestField("origin");
+                  }}
                   aria-label="Departure city"
                   autoComplete="off"
                   required
@@ -195,7 +276,10 @@ export function FlightSearchForm({
                 <button
                   type="button"
                   className="search-field__icon-btn"
-                  onClick={() => setSearchModalField("origin")}
+                  onClick={() => {
+                    setActiveSuggestField(null);
+                    setSearchModalField("origin");
+                  }}
                   title="Browse international airports"
                   aria-label="Browse international airports for departure"
                 >
@@ -205,6 +289,53 @@ export function FlightSearchForm({
               <span className="search-field__hint">
                 {originAirport?.airport ?? "Airport or city"}
               </span>
+
+              {/* Real-time Inline Suggestions Dropdown */}
+              {activeSuggestField === "origin" && inlineSuggestions.length > 0 && (
+                <div
+                  className="airport-inline-popover"
+                  role="listbox"
+                  aria-label="Departure airport suggestions"
+                >
+                  <div className="airport-inline-popover__header">
+                    <span>Suggested for &ldquo;{origin}&rdquo;</span>
+                  </div>
+                  <div className="airport-inline-popover__list">
+                    {inlineSuggestions.map((airport) => (
+                      <button
+                        key={airport.code}
+                        type="button"
+                        className="airport-inline-item"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          handleSelectInlineSuggestion(airport, "origin");
+                        }}
+                      >
+                        <span className="airport-inline-code">{airport.code}</span>
+                        <span className="airport-inline-info">
+                          <span>
+                            <strong>{airport.city}</strong>, {airport.country}
+                          </span>
+                          <small>{airport.airport}</small>
+                        </span>
+                        <span className="airport-inline-arrow">↵</span>
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    className="airport-inline-more-btn"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      setActiveSuggestField(null);
+                      setSearchModalField("origin");
+                    }}
+                  >
+                    <Icon name="search" size={12} />
+                    Search all 85+ global airports &amp; places →
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Airport Swap Button */}
@@ -216,6 +347,7 @@ export function FlightSearchForm({
                 const currentOrigin = origin;
                 setOrigin(selectedDestination);
                 handleDestinationChange(currentOrigin);
+                setActiveSuggestField(null);
               }}
             >
               <Icon name="arrow-left-right" size={20} />
@@ -228,7 +360,10 @@ export function FlightSearchForm({
                 <button
                   type="button"
                   className="search-field__place-btn"
-                  onClick={() => setSearchModalField("destination")}
+                  onClick={() => {
+                    setActiveSuggestField(null);
+                    setSearchModalField("destination");
+                  }}
                   aria-label="Search destination places and international airports"
                 >
                   <Icon name="search" size={11} />
@@ -240,7 +375,11 @@ export function FlightSearchForm({
                   list="skyfare-airports"
                   name="destination"
                   value={selectedDestination}
-                  onChange={(event) => handleDestinationChange(event.target.value)}
+                  onFocus={() => setActiveSuggestField("destination")}
+                  onChange={(event) => {
+                    handleDestinationChange(event.target.value);
+                    setActiveSuggestField("destination");
+                  }}
                   aria-label="Destination city"
                   autoComplete="off"
                   required
@@ -248,7 +387,10 @@ export function FlightSearchForm({
                 <button
                   type="button"
                   className="search-field__icon-btn"
-                  onClick={() => setSearchModalField("destination")}
+                  onClick={() => {
+                    setActiveSuggestField(null);
+                    setSearchModalField("destination");
+                  }}
                   title="Browse international airports"
                   aria-label="Browse international airports for destination"
                 >
@@ -258,6 +400,53 @@ export function FlightSearchForm({
               <span className="search-field__hint">
                 {destAirport?.airport ?? "Airport or city"}
               </span>
+
+              {/* Real-time Inline Suggestions Dropdown */}
+              {activeSuggestField === "destination" && inlineSuggestions.length > 0 && (
+                <div
+                  className="airport-inline-popover"
+                  role="listbox"
+                  aria-label="Destination airport suggestions"
+                >
+                  <div className="airport-inline-popover__header">
+                    <span>Suggested for &ldquo;{selectedDestination}&rdquo;</span>
+                  </div>
+                  <div className="airport-inline-popover__list">
+                    {inlineSuggestions.map((airport) => (
+                      <button
+                        key={airport.code}
+                        type="button"
+                        className="airport-inline-item"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          handleSelectInlineSuggestion(airport, "destination");
+                        }}
+                      >
+                        <span className="airport-inline-code">{airport.code}</span>
+                        <span className="airport-inline-info">
+                          <span>
+                            <strong>{airport.city}</strong>, {airport.country}
+                          </span>
+                          <small>{airport.airport}</small>
+                        </span>
+                        <span className="airport-inline-arrow">↵</span>
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    className="airport-inline-more-btn"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      setActiveSuggestField(null);
+                      setSearchModalField("destination");
+                    }}
+                  >
+                    <Icon name="search" size={12} />
+                    Search all 85+ global airports &amp; places →
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Departure Date Field */}
@@ -311,7 +500,10 @@ export function FlightSearchForm({
                   <button
                     type="button"
                     className="search-field__place-btn"
-                    onClick={() => setSearchModalField("via")}
+                    onClick={() => {
+                      setActiveSuggestField(null);
+                      setSearchModalField("via");
+                    }}
                     aria-label="Search next stop places and international airports"
                   >
                     <Icon name="search" size={11} />
@@ -322,7 +514,11 @@ export function FlightSearchForm({
                   <input
                     list="skyfare-airports"
                     value={via}
-                    onChange={(event) => setVia(event.target.value)}
+                    onFocus={() => setActiveSuggestField("via")}
+                    onChange={(event) => {
+                      setVia(event.target.value);
+                      setActiveSuggestField("via");
+                    }}
                     aria-label="Next stop"
                     placeholder="Airport or city"
                     autoComplete="off"
@@ -331,6 +527,41 @@ export function FlightSearchForm({
                 <span className="search-field__hint">
                   {viaAirport?.airport ?? "Via airport or city"}
                 </span>
+
+                {/* Inline suggestions for via */}
+                {activeSuggestField === "via" && inlineSuggestions.length > 0 && (
+                  <div
+                    className="airport-inline-popover"
+                    role="listbox"
+                    aria-label="Next stop airport suggestions"
+                  >
+                    <div className="airport-inline-popover__header">
+                      <span>Suggested for &ldquo;{via}&rdquo;</span>
+                    </div>
+                    <div className="airport-inline-popover__list">
+                      {inlineSuggestions.map((airport) => (
+                        <button
+                          key={airport.code}
+                          type="button"
+                          className="airport-inline-item"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            handleSelectInlineSuggestion(airport, "via");
+                          }}
+                        >
+                          <span className="airport-inline-code">{airport.code}</span>
+                          <span className="airport-inline-info">
+                            <span>
+                              <strong>{airport.city}</strong>, {airport.country}
+                            </span>
+                            <small>{airport.airport}</small>
+                          </span>
+                          <span className="airport-inline-arrow">↵</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : null}
 

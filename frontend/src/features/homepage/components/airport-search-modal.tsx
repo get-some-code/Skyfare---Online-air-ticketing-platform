@@ -42,15 +42,11 @@ function AirportSearchModalContent({
   const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Prevent background body scrolling while modal is open on mobile
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
     const timer = setTimeout(() => {
       inputRef.current?.focus();
     }, 60);
 
     return () => {
-      document.body.style.overflow = previousOverflow;
       clearTimeout(timer);
     };
   }, []);
