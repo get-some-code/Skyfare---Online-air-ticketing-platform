@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.v1.routes import auth, bookings, catalog, concierge, health, root
+from app.api.v1.routes import auth, bookings, catalog, concierge, health, planner, root
 
 router = APIRouter()
 router.include_router(root.router, tags=["service"])
@@ -9,3 +9,4 @@ router.include_router(auth.router, tags=["auth"])
 router.include_router(catalog.router, tags=["catalog"])
 router.include_router(bookings.router, tags=["bookings"])
 router.include_router(concierge.router, tags=["concierge"])
+router.include_router(planner.router, tags=["planner"])

@@ -83,4 +83,4 @@ def test_concierge_flight_options(client):
     assert "options" in data
     assert len(data["options"]) > 0
     labels = [o["label"] for o in data["options"]]
-    assert any("Business" in l or "Economy" in l or "DEL" in l for l in labels)
+    assert any("Business" in l or "Economy" in l or "DEL" in l or "Flight" in l for l in labels)

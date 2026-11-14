@@ -23,6 +23,11 @@ class Settings(BaseSettings):
     serpapi_base_url: str = "https://serpapi.com/search.json"
     groq_api_key: SecretStr | None = None
     gemini_api_key: SecretStr | None = None
+    planner_groq_model: str = "qwen/qwen3.8-27b"
+    planner_gemini_model: str = "gemini-2.5-flash"
+    planner_groq_timeout_seconds: float = 20.0
+    planner_gemini_timeout_seconds: float = 30.0
+    planner_request_timeout_seconds: float = 45.0
 
     model_config = SettingsConfigDict(
         env_file=".env",
