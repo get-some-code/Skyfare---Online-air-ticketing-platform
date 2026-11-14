@@ -10,24 +10,24 @@ const INITIAL_MESSAGES: ChatMessage[] = [
   {
     role: "assistant",
     content:
-      "Hello! I am SkyBot, your 24/7 personal flight concierge at SkyFare! ✈️✨ " +
-      "I'm here to help you search flights, check baggage allowances, manage bookings, unlock Privilege Club perks, and assist with corporate GST invoices. " +
+      "Hello! I am SkyBot, your 24/7 aviation & flight concierge at SkyFare! ✈️✨ " +
+      "I'm here exclusively to assist you with flight discovery, suitable routes, custom travel itineraries, airport guides, and bookings. " +
       "How may I assist your journey today?",
     options: [
       { label: "✈️ Delhi to Kolkata Flights", value: "del to ccu flights" },
-      { label: "🌴 Flights to Dubai", value: "flights to dubai" },
+      { label: "🗺️ Suitable Routes to Dubai", value: "What are suitable routes to Dubai?" },
+      { label: "🏖️ 4-Day Itinerary for Goa", value: "Suggest a 4-day travel itinerary for Goa" },
       { label: "🧳 Baggage Allowance", value: "What are the baggage allowances on Business Class?" },
-      { label: "💼 Corporate GST Invoicing", value: "How does Corporate GST invoicing work?" },
     ],
   },
 ];
 
 const QUICK_PROMPTS = [
+  "What are suitable flight routes to Dubai?",
+  "Suggest a 4-day travel itinerary for Goa",
   "What are the baggage allowances on Business Class?",
   "How does Corporate GST invoicing work?",
-  "What benefits do I get with SkyFare Privilege Club?",
-  "How can I cancel or reschedule my flight?",
-  "Which direct routes fly to Dubai (DXB)?",
+  "Which terminal at Delhi (DEL) handles international flights?",
 ];
 
 function renderFormattedText(text: string) {
@@ -178,7 +178,7 @@ export function ConciergeChat() {
             }}
           >
             <span className="concierge-teaser__badge">24/7 AI Concierge</span>
-            <p>Hi! I&apos;m SkyBot ✈️ Click me to plan your flight, check baggage, or lounges!</p>
+            <p>Hi! I&apos;m SkyBot ✈️ Click me for flight routes, itineraries, or airport guides!</p>
           </div>
           <button
             type="button"
@@ -353,7 +353,7 @@ export function ConciergeChat() {
               ref={inputRef}
               type="text"
               className="concierge-input"
-              placeholder="Ask about flights, baggage, GST, lounges…"
+              placeholder="Ask about flights, routes, itineraries, airports…"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}

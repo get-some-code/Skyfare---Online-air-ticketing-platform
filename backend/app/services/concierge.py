@@ -57,11 +57,93 @@ AIRPORT_NAMES = {
     "JAI": "Jaipur (JAI)",
 }
 
+GUARDRAIL_REFUSAL_MESSAGE = (
+    "I am **SkyBot**, SkyFare's dedicated aviation & flight concierge. ✈️✨\n\n"
+    "I am strictly programmed to assist with flight bookings, suitable flight routes, "
+    "travel itineraries, airports, baggage rules, and travel planning.\n\n"
+    "I cannot assist with sports, general trivia, politics, entertainment, or non-travel topics.\n\n"
+    "May I help you explore flight options, find the best route, or plan your travel itinerary today?"
+)
+
+GUARDRAIL_REFUSAL_OPTIONS = [
+    ChatOption(label="Search Flights", value="Help me find flights"),
+    ChatOption(label="Suitable Routes", value="What are the best routes?"),
+    ChatOption(label="Plan an Itinerary", value="Help me plan a travel itinerary"),
+    ChatOption(label="Baggage Allowances", value="What are the baggage allowances?"),
+]
+
+NON_TRAVEL_PATTERNS = [
+    # Sports, Matches & Tournaments
+    r"\b(world\s*cup|cricket|football|soccer|fifa|ipl|tennis|grand\s*slam|olympic[s]?|nba|nfl|formula\s*1|f1|badminton|hockey|wimbledon|super\s*bowl|uefa|premier\s*league|batting|bowling|wicket[s]?|touchdown|goal\s*scorer|stadium|match\s*score)\b",
+    # Trivia, celebrities, pop culture, non-travel politics
+    r"\b(who\s+won|who\s+lost|who\s+is\s+the\s+(?:president|prime\s*minister|actor|actress|singer|celebrity)|bollywood|hollywood|box\s*office|net\s*worth|celebrity\s*gossip|oscars?|grammys?|movie\s+plot|song\s+lyrics)\b",
+    # Programming, Coding, Math, Academic homework
+    r"\b(write\s+(?:a\s+)?code|python\s+code|javascript|algorithm|solve\s+(?:this\s+)?equation|calculus|derivative|integral|differential|homework|essay\s+on|scientific\s+theory|quantum\s+physics)\b",
+    # Cooking, crypto, financial markets
+    r"\b(recipe\s+for|how\s+to\s+cook|bake\s+(?:a\s+)?cake|cryptocurrency|bitcoin|ethereum|stock\s+tips|horoscope|astrology)\b",
+]
+
+TRAVEL_KEYWORDS = {
+    "flight", "flights", "flying", "fly", "flyer", "airline", "airlines", "airplane",
+    "aeroplane", "aircraft", "jet", "charter", "skyfare", "aviation", "airways",
+    "route", "routes", "itinerary", "itineraries", "layover", "transit", "connection",
+    "connecting", "non-stop", "direct flight", "destination", "destinations", "trip",
+    "travel", "travels", "traveling", "travelling", "traveller", "traveler", "tour",
+    "tourism", "tourist", "vacation", "holiday", "getaway", "visit", "sightseeing",
+    "airport", "airports", "terminal", "runway", "gate", "lounge", "lounges", "boarding",
+    "check-in", "check in", "security check", "customs", "immigration",
+    "baggage", "luggage", "cabin", "carry-on", "checked bag", "weight limit", "seat",
+    "seats", "economy", "business class", "first class", "ticket", "tickets", "booking",
+    "reservation", "fare", "fares", "price", "refund", "cancel", "reschedule",
+    "gst", "gstin", "itc", "invoice", "privilege club", "miles", "loyalty", "frequent flyer",
+    "hi", "hello", "hey", "greetings", "good morning", "good afternoon", "good evening",
+    "who are you", "what can you do", "help", "assist", "thanks", "thank you",
+}
+
+
+def is_strictly_off_topic(query: str) -> bool:
+    q = query.lower().strip()
+    if not q:
+        return False
+
+    orig, dest = _detect_route(q)
+    if orig and dest:
+        return False
+
+    has_travel_keyword = any(k in q for k in TRAVEL_KEYWORDS)
+    has_city_airport = any(re.search(r"\b" + re.escape(k) + r"\b", q) for k in AIRPORTS)
+    if has_city_airport:
+        has_travel_keyword = True
+
+    for pattern in NON_TRAVEL_PATTERNS:
+        if re.search(pattern, q):
+            # If the user asks a question with clear off-topic subject and no primary travel context
+            if not (has_travel_keyword and any(t in q for t in ["flight", "travel", "baggage", "fly", "trip", "ticket", "airline", "itinerary", "route"])):
+                return True
+
+    return False
+
+
 SYSTEM_PROMPT = """You are SkyBot — SkyFare's warm, intelligent female AI flight concierge and digital travel companion.
 
 Core Identity & Voice:
 1. Your name is SkyBot (she/her). You represent SkyFare, the premier executive flight booking and commercial charter platform.
 2. Tone: Helpful, courteous, professional, and charming. No slang, vulgarity, or trash talk.
+
+STRICT FLIGHT & TRAVEL GUARDRAIL POLICY (ABSOLUTE HIGHEST PRIORITY):
+You are strictly limited to flight-based, airline, airport, route, travel itinerary, and travel-planning topics ONLY.
+1. PERMITTED TOPICS:
+   • Commercial flights, private jets, charters, airlines, airfares, and flight ticket reservations.
+   • Suitable flight routes, connections, layovers, multi-city legs, and journey planning.
+   • Travel itineraries (e.g., weekend getaways, 3-to-7 day city itineraries, travel highlights, best time to fly).
+   • Airports, airport codes (IATA/ICAO), terminals, lounges, ground transit, and hub connections.
+   • Baggage policies, check-in rules, seat selections, cancellation/refund policies, SkyFare Privilege Club miles, and Corporate GST tax invoices.
+2. STRICT REFUSAL FOR NON-TRAVEL TOPICS:
+   • If the user asks ANY question outside flights, airlines, routes, itineraries, airports, and travel planning (such as sports, world cups, cricket, football, celebrities, movies, politics, science, math, coding, general trivia, news, or life advice):
+   • You MUST IMMEDIATELY and POLITELY REFUSE.
+   • NEVER answer the non-travel question, never give trivia answers, and never summarize sports or entertainment.
+   • Say: "I am SkyFare's dedicated aviation concierge, so I can only answer questions related to flights, suitable routes, travel itineraries, airports, and travel planning. ✈️"
+   • Politely pivot the user back to flight discovery, suitable routes, or itinerary planning.
 
 CRITICAL FLIGHT SEARCH RULE:
 When a user asks for flights or selects travel options (e.g. route, cabin, dates):
@@ -69,6 +151,12 @@ When a user asks for flights or selects travel options (e.g. route, cabin, dates
 - NEVER ask repetitive confirmation questions like "I have locked in your search. Would you like to see options?".
 - IMMEDIATELY provide 2 to 3 prominent flight choices with airline name, flight number, departure and arrival times, duration, and fare.
 - Direct them to the search link below to view all options.
+
+SUITABLE ROUTES & ITINERARIES RULE:
+When a user asks for suitable routes, flight connections, or travel itineraries:
+- Provide clear, well-structured flight recommendations or day-by-day travel highlights.
+- Mention primary airport codes, transit times, and best departure slots.
+- Always include helpful next steps for booking on SkyFare.
 
 FORMATTING RULES:
 - Never output double bullet markers or asterisk runs on the same line like "* **Commercial Flights:**".
@@ -312,6 +400,22 @@ def _clean_and_extract_options(raw_text: str, conversation: list[ChatMessage]) -
         "to refine the results"
     ])
 
+    # Detect guardrail refusal responses to immediately attach travel-oriented options
+    is_refusal = any(phrase in cleaned_lower for phrase in [
+        "dedicated aviation", "aviation concierge", "flight concierge",
+        "only answer questions related to flights", "cannot assist with sports",
+        "only assist with flight", "only answer flight", "outside flights, airlines",
+        "strictly programmed to assist with flight", "strictly limited to flight"
+    ])
+    if is_refusal:
+        options = [
+            ChatOption(label="Search Flights", value="Help me find flights"),
+            ChatOption(label="Suitable Routes", value="What are the best routes?"),
+            ChatOption(label="Plan an Itinerary", value="Help me plan a travel itinerary"),
+            ChatOption(label="Baggage Allowances", value="What are the baggage allowances?"),
+        ]
+        return cleaned, options
+
     # Check if user made a travel/cabin/date selection or asked for flights
     is_flight_selection = any(c in last_user for c in [
         "commercial flights", "economy class", "business class", "first class",
@@ -401,11 +505,38 @@ def _clean_and_extract_options(raw_text: str, conversation: list[ChatMessage]) -
 
 def _kb_fallback(query: str) -> str:
     q = query.lower()
+    if is_strictly_off_topic(q):
+        return GUARDRAIL_REFUSAL_MESSAGE
+
+    if any(k in q for k in ["itinerary", "itineraries", "travel plan", "plan a trip", "trip plan"]):
+        return (
+            "I would be delighted to help you design a travel itinerary! ✈️\n\n"
+            "• **Curated Daily Itineraries**: Daily route planning, must-visit landmarks, and ideal trip lengths\n"
+            "• **Optimized Flight Schedules**: Morning executive departures to maximize your stay\n"
+            "• **VIP Airport Arrival**: Terminal guidance, lounge access, and fast-track transit\n\n"
+            "Which destination are you planning your travel itinerary for?"
+        )
+    if any(k in q for k in ["suitable route", "best route", "routes", "layover", "connection", "connecting flight"]):
+        return (
+            "SkyFare analyzes commercial and corporate charter corridors to find your best routes:\n\n"
+            "• **Direct Express Corridors**: Fastest non-stop flights between primary domestic and international hubs\n"
+            "• **Seamless Transit Hubs**: Convenient single-ticket layovers via Dubai (DXB), Doha (DOH), and Delhi (DEL)\n"
+            "• **Executive Charters**: Point-to-point private jet routing with zero layovers\n\n"
+            "Tell me your origin and destination city or airport code to compare suitable routes!"
+        )
+    if any(k in q for k in ["airport", "terminal", "lounge"]):
+        return (
+            "SkyFare provides comprehensive airport guides across all major global hubs:\n\n"
+            "• **Terminal Guidance**: Dedicated check-in zones and expedited security lines\n"
+            "• **Executive Lounges**: Complimentary access with Business Class & Privilege Club Platinum\n"
+            "• **Ground Transit**: Seamless inter-terminal transfers and private apron transfers\n\n"
+            "Which airport or terminal would you like details on?"
+        )
     if any(k in q for k in ["who are you", "what is your name", "introduce", "hello", "hi", "hey"]):
         return (
             "Hello! I am **SkyBot**, your 24/7 personal flight concierge at SkyFare! ✈️✨ "
-            "I'm here to help you discover executive flights, check real-time baggage allowances, "
-            "manage bookings, unlock Privilege Club perks, and assist with corporate GST invoices. "
+            "I'm here to help you discover executive flights, find suitable routes, plan travel itineraries, "
+            "check real-time baggage allowances, manage bookings, and assist with corporate GST invoices. "
             "How may I assist your journey today?"
         )
     if any(k in q for k in ["privilege", "club", "loyalty", "tier", "mile"]):
@@ -513,14 +644,20 @@ async def _call_gemini(messages: list[ChatMessage], api_key: str) -> str:
 
 async def chat_with_concierge(messages: list[ChatMessage]) -> tuple[str, str, list[ChatOption]]:
     """
-    Dual-model AI fallback:
-    1. Try Groq (ultra-fast sub-second LLM)
-    2. Fallback to Google Gemini
-    3. Final fallback to built-in SkyFare Knowledge Base
+    Dual-model AI fallback with strict Flight & Travel Guardrails:
+    1. Pre-LLM Guardrail Check (instantly rejects non-travel queries)
+    2. Try Groq (ultra-fast sub-second LLM)
+    3. Fallback to Google Gemini
+    4. Post-LLM Guardrail Check
+    5. Final fallback to built-in SkyFare Knowledge Base
     Returns (cleaned_reply, provider_name, options_list)
     """
     settings = get_settings()
     last_user_query = next((m.content for m in reversed(messages) if m.role == "user"), "")
+
+    # 1. PRE-LLM GUARDRAIL: Strict filter for sports, trivia, coding, and off-topic questions
+    if is_strictly_off_topic(last_user_query):
+        return GUARDRAIL_REFUSAL_MESSAGE, "concierge-guardrail", GUARDRAIL_REFUSAL_OPTIONS
 
     groq_key = settings.groq_api_key.get_secret_value() if settings.groq_api_key else None
     gemini_key = settings.gemini_api_key.get_secret_value() if settings.gemini_api_key else None
@@ -528,7 +665,7 @@ async def chat_with_concierge(messages: list[ChatMessage]) -> tuple[str, str, li
     raw_reply = ""
     provider = "concierge-kb"
 
-    # 1. Attempt Groq
+    # 2. Attempt Groq
     if groq_key:
         try:
             raw_reply = await _call_groq(messages, groq_key)
@@ -536,7 +673,7 @@ async def chat_with_concierge(messages: list[ChatMessage]) -> tuple[str, str, li
         except Exception as e:
             logger.warning("Groq primary attempt failed: %s; falling back to Gemini.", e)
 
-    # 2. Attempt Gemini
+    # 3. Attempt Gemini
     if not raw_reply and gemini_key:
         try:
             raw_reply = await _call_gemini(messages, gemini_key)
@@ -544,7 +681,14 @@ async def chat_with_concierge(messages: list[ChatMessage]) -> tuple[str, str, li
         except Exception as e:
             logger.warning("Gemini fallback attempt failed: %s; falling back to knowledge base.", e)
 
-    # 3. Intelligent Concierge Knowledge Base
+    # 4. POST-LLM GUARDRAIL: Verify the LLM didn't leak non-travel trivia
+    if raw_reply and any(re.search(p, raw_reply, re.IGNORECASE) for p in [
+        r"\b(?:world\s*cup\s+was\s+won|cricket\s+world\s+cup|defeated\s+new\s+zealand|super\s+over)\b",
+        r"\b(?:won\s+the\s+2019\s+world\s*cup)\b"
+    ]):
+        return GUARDRAIL_REFUSAL_MESSAGE, "concierge-guardrail", GUARDRAIL_REFUSAL_OPTIONS
+
+    # 5. Intelligent Concierge Knowledge Base
     if not raw_reply:
         raw_reply = _kb_fallback(last_user_query)
         provider = "concierge-kb"
