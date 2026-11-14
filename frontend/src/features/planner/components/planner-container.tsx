@@ -181,7 +181,7 @@ export function PlannerContainer() {
     try {
       const [res] = await Promise.all([
         generateTripPlanApi(state),
-        new Promise((resolve) => setTimeout(resolve, 600)),
+        new Promise((resolve) => setTimeout(resolve, 2000)),
       ]);
       setPlan(res.plan);
     } catch (err: unknown) {

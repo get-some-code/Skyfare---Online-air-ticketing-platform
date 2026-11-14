@@ -3,13 +3,37 @@
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/icon";
 
-const STATUS_MESSAGES = [
-  "Finding the best arrival airport and transit corridors...",
-  "Mapping optimal routes, tunnels, and scenic mountain passes...",
-  "Curating verified local restaurants and vegetarian dining...",
-  "Calculating 3-tier budget estimates in INR...",
-  "Compiling Indian traveller advisories, permits, and connectivity...",
-  "Finalizing your bespoke flight and journey blueprint...",
+const PLANNING_STEPS = [
+  {
+    step: 1,
+    title: "Locating Gateway Airports",
+    desc: "Analyzing arrival airports, runways, and onward transit corridors...",
+  },
+  {
+    step: 2,
+    title: "Mapping Scenic Corridors",
+    desc: "Verifying scenic mountain passes, tunnels, and high-elevation checkpoints...",
+  },
+  {
+    step: 3,
+    title: "Architecting Daily Itinerary",
+    desc: "Curating authentic viewpoints, heritage temples, and non-repeating stops...",
+  },
+  {
+    step: 4,
+    title: "Vetting Dining & Food",
+    desc: "Selecting verified restaurants with pure vegetarian and local specialties...",
+  },
+  {
+    step: 5,
+    title: "Calculating Itemized Budget",
+    desc: "Summing local transport, stays, entry passes, and approximate flight fares in INR...",
+  },
+  {
+    step: 6,
+    title: "Finalizing Traveller Blueprint",
+    desc: "Compiling permits, currency advisories, and SIM connectivity for Indian travellers...",
+  },
 ];
 
 export function PlannerLoading({ destination }: { destination: string }) {
@@ -17,10 +41,13 @@ export function PlannerLoading({ destination }: { destination: string }) {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setIndex((prev) => (prev + 1) % STATUS_MESSAGES.length);
-    }, 2400);
+      setIndex((prev) => (prev + 1) % PLANNING_STEPS.length);
+    }, 1800);
     return () => clearInterval(interval);
   }, []);
+
+  const current = PLANNING_STEPS[index];
+  const progressPercent = Math.min(95, Math.round(((index + 1) / PLANNING_STEPS.length) * 100));
 
   return (
     <div className="planner-loading-card" role="status" aria-live="polite">
@@ -32,10 +59,18 @@ export function PlannerLoading({ destination }: { destination: string }) {
       </div>
 
       <div className="planner-loading-card__content">
+        <div className="planner-loading-badge">
+          Step {current.step} of {PLANNING_STEPS.length}: {current.title}
+        </div>
         <h3>Building your plan for {destination}</h3>
         <p className="planner-loading-card__status" key={index}>
-          {STATUS_MESSAGES[index]}
+          {current.desc}
         </p>
+
+        {/* Dynamic Animated Progress Indicator */}
+        <div className="planner-loading-progress-wrap" aria-hidden="true">
+          <div className="planner-loading-progress-bar" style={{ width: `${progressPercent}%` }} />
+        </div>
       </div>
 
       {/* Shimmer Skeletons */}

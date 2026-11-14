@@ -179,7 +179,7 @@ export async function generateTripPlanApi(
   }
 
   const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
-  const timeoutId = controller ? setTimeout(() => controller.abort(), 2000) : null;
+  const timeoutId = controller ? setTimeout(() => controller.abort(), 12000) : null;
 
   try {
     const res = await apiRequest<PlannerGenerateResponse>("planner/generate", {

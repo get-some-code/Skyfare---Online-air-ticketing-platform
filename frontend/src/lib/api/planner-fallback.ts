@@ -1,4 +1,5 @@
 import type {
+  BudgetBreakdown,
   DayPlan,
   PlannerChatResponse,
   PlannerGenerateResponse,
@@ -230,6 +231,34 @@ function resolveIata(cityOrPlace: string, fallback: string): string {
   return fallback;
 }
 
+function createBudgetTier(
+  days: number,
+  localPerDay: number,
+  stayPerDay: number,
+  foodPerDay: number,
+  sightPerDay: number,
+  actPerDay: number,
+  miscPerDay: number,
+): BudgetBreakdown {
+  const localVal = Math.round(localPerDay * days);
+  const stayVal = Math.round(stayPerDay * days);
+  const foodVal = Math.round(foodPerDay * days);
+  const sightVal = Math.round(sightPerDay * days);
+  const actVal = Math.round(actPerDay * days);
+  const miscVal = Math.round(miscPerDay * days);
+  const totalVal = localVal + stayVal + foodVal + sightVal + actVal + miscVal;
+
+  return {
+    local_travel: `₹${localVal.toLocaleString("en-IN")}`,
+    stay: `₹${stayVal.toLocaleString("en-IN")}`,
+    food: `₹${foodVal.toLocaleString("en-IN")}`,
+    sightseeing: `₹${sightVal.toLocaleString("en-IN")}`,
+    activities: `₹${actVal.toLocaleString("en-IN")}`,
+    misc: `₹${miscVal.toLocaleString("en-IN")}`,
+    total: `₹${totalVal.toLocaleString("en-IN")}`,
+  };
+}
+
 function buildDomesticPlan(
   dest: string,
   days: number,
@@ -253,7 +282,8 @@ function buildDomesticPlan(
   }
 
   const multiplier = budget === "premium" ? 2.2 : budget === "budget" ? 0.65 : 1.0;
-  const baseTotal = days * 4200 * multiplier;
+  const minDomFlight = Math.round(6500 * multiplier);
+  const maxDomFlight = Math.round(12000 * multiplier);
 
   return {
     overview: `Experience the breathtaking landscapes and premier cultural landmarks of ${dest}. Perfectly tailored for Indian travellers seeking an authentic, seamless journey from ${origin}.`,
@@ -294,34 +324,10 @@ function buildDomesticPlan(
     route_summary: `${origin} (${origIata}) → ${dest} (${destIata}) logistics corridor with verified road conditions and scenic transit stops.`,
     days: generatedDays,
     budget: {
-      low: {
-        local_travel: `₹${Math.round(800 * days * 0.7).toLocaleString("en-IN")}`,
-        stay: `₹${Math.round(1800 * days * 0.7).toLocaleString("en-IN")}`,
-        food: `₹${Math.round(900 * days * 0.7).toLocaleString("en-IN")}`,
-        sightseeing: `₹${Math.round(500 * days * 0.7).toLocaleString("en-IN")}`,
-        activities: `₹${Math.round(800 * days * 0.7).toLocaleString("en-IN")}`,
-        misc: `₹${Math.round(400 * days * 0.7).toLocaleString("en-IN")}`,
-        total: `₹${Math.round(baseTotal * 0.7).toLocaleString("en-IN")}`,
-      },
-      medium: {
-        local_travel: `₹${Math.round(1400 * days).toLocaleString("en-IN")}`,
-        stay: `₹${Math.round(3500 * days).toLocaleString("en-IN")}`,
-        food: `₹${Math.round(1500 * days).toLocaleString("en-IN")}`,
-        sightseeing: `₹${Math.round(900 * days).toLocaleString("en-IN")}`,
-        activities: `₹${Math.round(1500 * days).toLocaleString("en-IN")}`,
-        misc: `₹${Math.round(700 * days).toLocaleString("en-IN")}`,
-        total: `₹${Math.round(baseTotal).toLocaleString("en-IN")}`,
-      },
-      high: {
-        local_travel: `₹${Math.round(2600 * days * 1.6).toLocaleString("en-IN")}`,
-        stay: `₹${Math.round(7500 * days * 1.6).toLocaleString("en-IN")}`,
-        food: `₹${Math.round(2800 * days * 1.6).toLocaleString("en-IN")}`,
-        sightseeing: `₹${Math.round(1800 * days * 1.6).toLocaleString("en-IN")}`,
-        activities: `₹${Math.round(3200 * days * 1.6).toLocaleString("en-IN")}`,
-        misc: `₹${Math.round(1400 * days * 1.6).toLocaleString("en-IN")}`,
-        total: `₹${Math.round(baseTotal * 2.2).toLocaleString("en-IN")}`,
-      },
-      approx_flights_inr: `₹${(6500 * multiplier).toFixed(0)} - ₹${(12000 * multiplier).toFixed(0)}`,
+      low: createBudgetTier(days, 550, 1600, 750, 350, 500, 250),
+      medium: createBudgetTier(days, 1200, 3500, 1500, 800, 1200, 600),
+      high: createBudgetTier(days, 2500, 8000, 2800, 1600, 2800, 1100),
+      approx_flights_inr: `₹${minDomFlight.toLocaleString("en-IN")} - ₹${maxDomFlight.toLocaleString("en-IN")}`,
     },
     indian_traveller: {
       visa_or_permits: isManali
@@ -1254,7 +1260,8 @@ function buildInternationalPlan(
   }
 
   const multiplier = budget === "premium" ? 2.4 : budget === "budget" ? 0.7 : 1.0;
-  const baseTotal = days * 11500 * multiplier;
+  const minIntlFlight = Math.round((isDubai ? 18000 : 45000) * multiplier);
+  const maxIntlFlight = Math.round((isDubai ? 28000 : 72000) * multiplier);
 
   return {
     overview: `An executive international itinerary across ${dest}, offering world-class infrastructure, iconic architectural monuments, and effortless connectivity for Indian passport holders.`,
@@ -1293,36 +1300,10 @@ function buildInternationalPlan(
     route_summary: `${origin} (${origIata}) → ${dest} (${destIata}) high-efficiency corridor with scenic rail routes and multi-lingual transit hubs.`,
     days: generatedDays,
     budget: {
-      low: {
-        local_travel: `₹${Math.round(2200 * days * 0.7).toLocaleString("en-IN")}`,
-        stay: `₹${Math.round(5500 * days * 0.7).toLocaleString("en-IN")}`,
-        food: `₹${Math.round(2500 * days * 0.7).toLocaleString("en-IN")}`,
-        sightseeing: `₹${Math.round(2000 * days * 0.7).toLocaleString("en-IN")}`,
-        activities: `₹${Math.round(2000 * days * 0.7).toLocaleString("en-IN")}`,
-        misc: `₹${Math.round(1000 * days * 0.7).toLocaleString("en-IN")}`,
-        total: `₹${Math.round(baseTotal * 0.7).toLocaleString("en-IN")}`,
-      },
-      medium: {
-        local_travel: `₹${Math.round(3800 * days).toLocaleString("en-IN")}`,
-        stay: `₹${Math.round(9500 * days).toLocaleString("en-IN")}`,
-        food: `₹${Math.round(4200 * days).toLocaleString("en-IN")}`,
-        sightseeing: `₹${Math.round(3500 * days).toLocaleString("en-IN")}`,
-        activities: `₹${Math.round(4000 * days).toLocaleString("en-IN")}`,
-        misc: `₹${Math.round(1800 * days).toLocaleString("en-IN")}`,
-        total: `₹${Math.round(baseTotal).toLocaleString("en-IN")}`,
-      },
-      high: {
-        local_travel: `₹${Math.round(7500 * days * 1.5).toLocaleString("en-IN")}`,
-        stay: `₹${Math.round(22000 * days * 1.5).toLocaleString("en-IN")}`,
-        food: `₹${Math.round(8500 * days * 1.5).toLocaleString("en-IN")}`,
-        sightseeing: `₹${Math.round(6500 * days * 1.5).toLocaleString("en-IN")}`,
-        activities: `₹${Math.round(8000 * days * 1.5).toLocaleString("en-IN")}`,
-        misc: `₹${Math.round(3500 * days * 1.5).toLocaleString("en-IN")}`,
-        total: `₹${Math.round(baseTotal * 2.4).toLocaleString("en-IN")}`,
-      },
-      approx_flights_inr: isDubai
-        ? `₹${(18000 * multiplier).toFixed(0)} - ₹${(28000 * multiplier).toFixed(0)}`
-        : `₹${(45000 * multiplier).toFixed(0)} - ₹${(72000 * multiplier).toFixed(0)}`,
+      low: createBudgetTier(days, 1500, 4500, 2000, 1200, 1400, 600),
+      medium: createBudgetTier(days, 2800, 8500, 3500, 2200, 2800, 1200),
+      high: createBudgetTier(days, 6000, 18000, 6500, 4500, 6000, 2500),
+      approx_flights_inr: `₹${minIntlFlight.toLocaleString("en-IN")} - ₹${maxIntlFlight.toLocaleString("en-IN")}`,
     },
     indian_traveller: {
       visa_or_permits: isGermany || isSwiss

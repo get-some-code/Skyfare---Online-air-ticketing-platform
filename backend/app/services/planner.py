@@ -465,6 +465,7 @@ Ensure exactly {days_count} day objects are generated in the "days" array.
 
     # Clean and validate IATA codes against existing catalog
     _sanitize_flight_search(raw_data, origin, dest, days_count)
+    _sanitize_budget(raw_data)
 
     # Validate against Pydantic schema
     try:
@@ -509,3 +510,36 @@ def _sanitize_flight_search(raw_data: dict[str, Any], origin: str, dest: str, da
     flight_search["passengers"] = int(flight_search.get("passengers") or 1)
 
     raw_data["flight_search"] = flight_search
+
+
+def _sanitize_budget(raw_data: dict[str, Any]) -> None:
+    import re
+    budget = raw_data.get("budget", {})
+    if not isinstance(budget, dict):
+        return
+
+    fields = ["local_travel", "stay", "food", "sightseeing", "activities", "misc"]
+    for tier_key in ["low", "medium", "high"]:
+        tier = budget.get(tier_key)
+        if isinstance(tier, dict):
+            total_sum = 0
+            for f in fields:
+                val_str = str(tier.get(f, ""))
+                digits = re.sub(r"[^\d]", "", val_str)
+                num = int(digits) if digits else 0
+                total_sum += num
+                if num > 0:
+                    tier[f] = f"₹{num:,}"
+            if total_sum > 0:
+                tier["total"] = f"₹{total_sum:,}"
+
+    # Format approx_flights_inr with comma separators
+    flights_val = str(budget.get("approx_flights_inr", ""))
+    if flights_val:
+        def comma_repl(match: re.Match[str]) -> str:
+            prefix = match.group(1)
+            num_str = match.group(2)
+            return f"{prefix}{int(num_str):,}"
+        formatted_flights = re.sub(r"(₹|\b)(\d{4,7})\b", comma_repl, flights_val)
+        budget["approx_flights_inr"] = formatted_flights
+

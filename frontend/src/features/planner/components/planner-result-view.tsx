@@ -21,6 +21,26 @@ export function PlannerResultView({
 
   const budgetData = plan.budget[activeBudgetTier];
 
+  // Dynamically compute exact mathematical sum of line items to guarantee 100% arithmetic consistency
+  function parseCost(val?: string): number {
+    if (!val) return 0;
+    const num = parseInt(val.replace(/[^0-9]/g, ""), 10);
+    return isNaN(num) ? 0 : num;
+  }
+
+  const computedTotalNum =
+    parseCost(budgetData.local_travel) +
+    parseCost(budgetData.stay) +
+    parseCost(budgetData.food) +
+    parseCost(budgetData.sightseeing) +
+    parseCost(budgetData.activities) +
+    parseCost(budgetData.misc);
+
+  const displayedTotal =
+    computedTotalNum > 0
+      ? `₹${computedTotalNum.toLocaleString("en-IN")}`
+      : budgetData.total;
+
   // Build the flight search link URL
   const { origin_iata, destination_iata, depart_date, return_date, passengers } = plan.flight_search;
   const flightSearchUrl = `/flights/search?origin=${encodeURIComponent(origin_iata)}&destination=${encodeURIComponent(destination_iata)}&departure=${encodeURIComponent(depart_date)}&return=${encodeURIComponent(return_date)}&travellers=${passengers}&tripType=round-trip`;
@@ -355,7 +375,7 @@ export function PlannerResultView({
                 </div>
                 <div className="planner-budget-row planner-budget-row--total">
                   <span>Total Estimated Land Cost</span>
-                  <strong>{budgetData.total}</strong>
+                  <strong>{displayedTotal}</strong>
                 </div>
               </div>
 
@@ -405,7 +425,7 @@ export function PlannerResultView({
       <div className="planner-mobile-sticky-bar">
         <div className="planner-mobile-sticky-bar__info">
           <span>Total Land Cost:</span>
-          <strong>{budgetData.total}</strong>
+          <strong>{displayedTotal}</strong>
         </div>
         <Link href={flightSearchUrl} className="button button--primary planner-mobile-sticky-bar__btn">
           <Icon name="plane" size={16} />
