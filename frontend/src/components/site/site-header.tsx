@@ -81,6 +81,9 @@ export function SiteHeader() {
             <Link href="/#search" onClick={closeMenu}>
               Search Flights
             </Link>
+            <Link href="/planner" onClick={closeMenu}>
+              Trip Planner
+            </Link>
             <button
               type="button"
               onClick={() => {

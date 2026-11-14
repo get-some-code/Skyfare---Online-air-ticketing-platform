@@ -197,10 +197,18 @@ function SearchResultsContent() {
               </span>
             </div>
           </div>
-          <Link href="/#search" className="button button--secondary button--small search-bar__modify">
-            <SearchIcon />
-            Modify Search
-          </Link>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+            <Link
+              href={`/planner?destination=${encodeURIComponent(AIRPORT_LOOKUP[destination]?.city || destination)}&origin=${encodeURIComponent(AIRPORT_LOOKUP[origin]?.city || origin)}&departure=${encodeURIComponent(departure)}${returnDate ? `&return=${encodeURIComponent(returnDate)}` : ""}&travellers=${travellers}`}
+              className="button button--secondary button--small search-bar__plan-trip"
+            >
+              Plan your trip to {AIRPORT_LOOKUP[destination]?.city || destination}
+            </Link>
+            <Link href="/#search" className="button button--secondary button--small search-bar__modify">
+              <SearchIcon />
+              Modify Search
+            </Link>
+          </div>
         </div>
       </div>
 

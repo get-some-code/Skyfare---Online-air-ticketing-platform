@@ -9,6 +9,7 @@ import { FleetShowcase } from "@/features/homepage/components/fleet-showcase";
 import { FlightSearchForm } from "@/features/homepage/components/flight-search-form";
 import { MembershipSection } from "@/features/homepage/components/membership-section";
 import { OffersSection } from "@/features/homepage/components/offers-section";
+import { PlannerTeaserSection } from "@/features/homepage/components/planner-teaser-section";
 import { airports } from "@/features/homepage/data/homepage-fixtures";
 
 export function HomePage() {
@@ -89,6 +90,9 @@ export function HomePage() {
             </span>
           </div>
         </div>
+
+        {/* AI Trip Planner Quick Launch Teaser */}
+        <PlannerTeaserSection />
 
         {/* Dynamic Fleet & Luxury Interior Showcase Slideshow */}
         <FleetShowcase />
