@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/components/auth/auth-context";
 import { Icon } from "@/components/ui/icon";
-import { cancelBookingEnhancedApi, downloadTicketPdfUrl } from "@/lib/api/bookings";
+import { cancelBookingEnhancedApi, downloadTicketPdfUrl, getLocalBookings } from "@/lib/api/bookings";
 import { getBookingsApi } from "@/lib/api/auth";
 import type { BookingPublic } from "@/lib/api/types";
 
@@ -14,7 +14,7 @@ interface BookingsDialogProps {
 
 export function BookingsDialog({ open, onClose }: BookingsDialogProps) {
   const { isAuthenticated, openAuthModal } = useAuth();
-  const [bookings, setBookings] = useState<BookingPublic[]>([]);
+  const [bookings, setBookings] = useState<BookingPublic[]>(() => getLocalBookings());
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"all" | "upcoming" | "completed" | "cancelled">("all");
 
@@ -35,7 +35,7 @@ export function BookingsDialog({ open, onClose }: BookingsDialogProps) {
   }, [open, onClose, cancelModalBooking]);
 
   useEffect(() => {
-    if (!open || !isAuthenticated) return;
+    if (!open) return;
     let ignore = false;
     getBookingsApi()
       .then((data) => {
@@ -46,7 +46,7 @@ export function BookingsDialog({ open, onClose }: BookingsDialogProps) {
       })
       .catch(() => {
         if (!ignore) {
-          setBookings([]);
+          setBookings(getLocalBookings());
           setLoading(false);
         }
       });
@@ -54,6 +54,18 @@ export function BookingsDialog({ open, onClose }: BookingsDialogProps) {
       ignore = true;
     };
   }, [open, isAuthenticated]);
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      getBookingsApi().then((data) => setBookings(data));
+    };
+    window.addEventListener("skyfare:booking_updated", handleUpdate);
+    window.addEventListener("skyfare:booking_confirmed", handleUpdate);
+    return () => {
+      window.removeEventListener("skyfare:booking_updated", handleUpdate);
+      window.removeEventListener("skyfare:booking_confirmed", handleUpdate);
+    };
+  }, []);
 
   if (!open) return null;
 
@@ -120,7 +132,7 @@ export function BookingsDialog({ open, onClose }: BookingsDialogProps) {
           </h2>
         </div>
 
-        {!isAuthenticated ? (
+        {!isAuthenticated && bookings.length === 0 ? (
           <div className="bookings-empty-state">
             <p className="bookings-dialog__desc">
               Sign in to access your confirmed e-tickets, seat maps, baggage allowances, and flight change options.
@@ -141,13 +153,42 @@ export function BookingsDialog({ open, onClose }: BookingsDialogProps) {
               </button>
             </div>
           </div>
-        ) : loading ? (
+        ) : loading && isAuthenticated ? (
           <div className="bookings-loading-state">
             <div className="spinner" />
             <p>Retrieving your confirmed bookings from central reservation systems…</p>
           </div>
         ) : (
           <div className="bookings-content">
+            {!isAuthenticated && bookings.length > 0 && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  background: "#eff6ff",
+                  border: "1px solid #bfdbfe",
+                  borderRadius: "8px",
+                  padding: "8px 12px",
+                  marginBottom: "12px",
+                  color: "#1e3a8a",
+                  fontSize: "12px",
+                }}
+              >
+                <span>Recent device bookings. Sign in to link to your account.</span>
+                <button
+                  type="button"
+                  className="button button--secondary button--sm"
+                  onClick={() => {
+                    onClose();
+                    openAuthModal("login");
+                  }}
+                  style={{ marginLeft: "8px", padding: "2px 8px", fontSize: "11px" }}
+                >
+                  Sign In
+                </button>
+              </div>
+            )}
             {/* Filter Tabs */}
             <div className="bookings-tab-bar" role="tablist">
               {[

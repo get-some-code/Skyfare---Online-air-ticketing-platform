@@ -3810,7 +3810,7 @@ select:focus-visible {
 .auth-overlay {
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  z-index: 10001;
   background: rgba(0, 21, 42, 0.65);
   backdrop-filter: blur(8px);
   display: grid;

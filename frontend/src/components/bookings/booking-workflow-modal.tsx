@@ -147,7 +147,7 @@ export function BookingWorkflowModal({
   }
 
   async function handleProceedToPayment() {
-    if (!isAuthenticated) {
+    if (!isAuthenticated && !contactEmail) {
       openAuthModal("login");
       return;
     }
@@ -172,7 +172,11 @@ export function BookingWorkflowModal({
     };
 
     try {
-      const res = await createBookingEnhancedApi(payload);
+      const res = await createBookingEnhancedApi(payload, {
+        flight,
+        returnFlight,
+        breakdown,
+      });
       setBookingInProgress(res);
       setCurrentStep("payment");
     } catch (err: unknown) {

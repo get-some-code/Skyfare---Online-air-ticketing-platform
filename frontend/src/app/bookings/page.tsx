@@ -4,7 +4,7 @@ import React, { Suspense, useEffect, useState, useSyncExternalStore } from "reac
 import Link from "next/link";
 import { useAuth } from "@/components/auth/auth-context";
 import { Icon } from "@/components/ui/icon";
-import { cancelBookingEnhancedApi, downloadTicketPdfUrl } from "@/lib/api/bookings";
+import { cancelBookingEnhancedApi, downloadTicketPdfUrl, getLocalBookings } from "@/lib/api/bookings";
 import { getBookingsApi } from "@/lib/api/auth";
 import type { BookingPublic } from "@/lib/api/types";
 
@@ -27,16 +27,16 @@ export default function BookingsPage() {
 
 function BookingsPageContent() {
   const { isAuthenticated, openAuthModal } = useAuth();
+  const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const [bookings, setBookings] = useState<BookingPublic[]>([]);
   const [loading, setLoading] = useState(true);
-  const currentTime = useSyncExternalStore(emptySubscribe, () => Date.now(), () => 0);
   const [activeTab, setActiveTab] = useState<"all" | "upcoming" | "completed" | "cancelled">("all");
   const [cancelModalBooking, setCancelModalBooking] = useState<BookingPublic | null>(null);
   const [cancelReason, setCancelReason] = useState("Change of travel plans");
   const [processingCancel, setProcessingCancel] = useState(false);
+  const [currentTime] = useState(() => Date.now());
 
   useEffect(() => {
-    if (!isAuthenticated) return;
     let ignore = false;
     getBookingsApi()
       .then((data) => {
@@ -47,7 +47,7 @@ function BookingsPageContent() {
       })
       .catch(() => {
         if (!ignore) {
-          setBookings([]);
+          setBookings(getLocalBookings());
           setLoading(false);
         }
       });
@@ -55,6 +55,18 @@ function BookingsPageContent() {
       ignore = true;
     };
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      getBookingsApi().then((data) => setBookings(data));
+    };
+    window.addEventListener("skyfare:booking_updated", handleUpdate);
+    window.addEventListener("skyfare:booking_confirmed", handleUpdate);
+    return () => {
+      window.removeEventListener("skyfare:booking_updated", handleUpdate);
+      window.removeEventListener("skyfare:booking_confirmed", handleUpdate);
+    };
+  }, []);
 
   async function handleConfirmCancel() {
     if (!cancelModalBooking) return;
@@ -103,7 +115,12 @@ function BookingsPageContent() {
         </Link>
       </div>
 
-      {!isAuthenticated ? (
+      {!mounted || (loading && isAuthenticated) ? (
+        <div className="bookings-page-loading">
+          <div className="spinner" />
+          <p>Loading your flight reservations...</p>
+        </div>
+      ) : !isAuthenticated && bookings.length === 0 ? (
         <div className="bookings-page-unauth">
           <Icon name="lock" size={48} className="unauth-icon" />
           <h2>Sign In to View Your Trips</h2>
@@ -116,13 +133,37 @@ function BookingsPageContent() {
             Sign In to SkyFare
           </button>
         </div>
-      ) : loading ? (
-        <div className="bookings-page-loading">
-          <div className="spinner" />
-          <p>Loading your flight reservations...</p>
-        </div>
       ) : (
         <div className="bookings-page-content">
+          {!isAuthenticated && bookings.length > 0 && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                background: "#eff6ff",
+                border: "1px solid #bfdbfe",
+                borderRadius: "12px",
+                padding: "14px 18px",
+                marginBottom: "20px",
+                color: "#1e3a8a",
+                fontSize: "14px",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <Icon name="plane" size={18} />
+                <span>Showing recent flight bookings made on this device. Sign in to link them permanently to your SkyFare account.</span>
+              </div>
+              <button
+                type="button"
+                className="button button--secondary button--sm"
+                onClick={() => openAuthModal("login")}
+                style={{ flexShrink: 0 }}
+              >
+                Sign In
+              </button>
+            </div>
+          )}
           <div className="bookings-tab-bar" role="tablist">
             {[
               { key: "all", label: `All Trips (${bookings.length})` },
