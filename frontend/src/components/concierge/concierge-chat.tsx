@@ -110,8 +110,8 @@ export function ConciergeChat() {
 
   useEffect(() => {
     if (isOpen) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-      inputRef.current?.focus();
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      inputRef.current?.focus({ preventScroll: true });
     }
   }, [isOpen, messages, isLoading]);
 

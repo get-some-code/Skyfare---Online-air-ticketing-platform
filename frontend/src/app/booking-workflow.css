@@ -1,0 +1,355 @@
+/* ==========================================================================
+   BOOKING WORKFLOW - REVIEW & HOLD STEP (STEP 5)
+   ========================================================================== */
+
+.workflow-header__subtitle {
+  font-size: 13px !important;
+  color: #64748b !important;
+  margin: 4px 0 0 !important;
+  font-weight: 500 !important;
+}
+
+.step-review {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 20px !important;
+}
+
+.step-review__intro h3 {
+  font-size: 19px !important;
+  font-weight: 800 !important;
+  color: #0b2545 !important;
+  margin: 0 0 4px !important;
+}
+
+.step-review__intro p {
+  font-size: 13.5px !important;
+  color: #64748b !important;
+  margin: 0 !important;
+}
+
+.review-itinerary-card {
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 16px !important;
+  padding: 22px 24px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 18px !important;
+}
+
+.review-itinerary-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: wrap !important;
+  gap: 12px !important;
+  padding-bottom: 14px !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.review-itinerary-airline {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  flex-wrap: wrap !important;
+}
+
+.airline-badge {
+  background: #0d5edb !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  font-size: 12px !important;
+  padding: 4px 10px !important;
+  border-radius: 6px !important;
+  letter-spacing: 0.02em !important;
+  display: inline-block !important;
+}
+
+.flight-no {
+  font-weight: 700 !important;
+  font-size: 13px !important;
+  color: #0b2545 !important;
+  background: #e2e8f0 !important;
+  padding: 4px 10px !important;
+  border-radius: 6px !important;
+  display: inline-block !important;
+}
+
+.aircraft-pill {
+  font-size: 12px !important;
+  color: #64748b !important;
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  padding: 3px 10px !important;
+  border-radius: 6px !important;
+  font-weight: 500 !important;
+  display: inline-block !important;
+}
+
+.review-tier-badge {
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.05em !important;
+  background: #eff6ff !important;
+  color: #1d4ed8 !important;
+  border: 1px solid #bfdbfe !important;
+  padding: 4px 10px !important;
+  border-radius: 20px !important;
+  display: inline-block !important;
+}
+
+.review-flight-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  padding: 6px 0 !important;
+}
+
+.review-endpoint {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 3px !important;
+}
+
+.review-endpoint--origin {
+  text-align: left !important;
+}
+
+.review-endpoint--dest {
+  text-align: right !important;
+}
+
+.review-time {
+  font-size: 24px !important;
+  font-weight: 800 !important;
+  color: #0b2545 !important;
+  letter-spacing: -0.02em !important;
+  line-height: 1.1 !important;
+}
+
+.review-city {
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  color: #334155 !important;
+}
+
+.review-date {
+  font-size: 12px !important;
+  color: #64748b !important;
+}
+
+.flight-duration-center {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  flex: 1 !important;
+  max-width: 200px !important;
+  margin: 0 auto !important;
+}
+
+.flight-duration-text {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #64748b !important;
+}
+
+.flight-track {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+}
+
+.track-line {
+  flex: 1 !important;
+  height: 2px !important;
+  background: #cbd5e1 !important;
+  position: relative !important;
+}
+
+.track-plane {
+  color: #0d5edb !important;
+  transform: rotate(90deg) !important;
+  flex-shrink: 0 !important;
+}
+
+.flight-stop-badge {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #059669 !important;
+  background: #ecfdf5 !important;
+  padding: 2px 8px !important;
+  border-radius: 12px !important;
+  display: inline-block !important;
+}
+
+.review-passenger-summary {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  padding-top: 14px !important;
+  border-top: 1px solid #e2e8f0 !important;
+}
+
+.review-summary-label {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  color: #64748b !important;
+}
+
+.review-passenger-chips {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+}
+
+.review-passenger-chip {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  padding: 6px 12px !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  color: #1e293b !important;
+}
+
+.review-passenger-chip svg {
+  color: #0d5edb !important;
+}
+
+.review-chip-seat {
+  font-size: 12px !important;
+  color: #64748b !important;
+  padding-left: 6px !important;
+  border-left: 1px solid #e2e8f0 !important;
+}
+
+.review-chip-seat strong {
+  color: #0d5edb !important;
+  font-weight: 700 !important;
+}
+
+/* Fare Breakdown Card */
+.review-breakdown-card {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 16px !important;
+  padding: 22px 24px !important;
+  box-shadow: 0 4px 16px rgba(11, 37, 69, 0.04) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+}
+
+.review-breakdown-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin-bottom: 4px !important;
+  padding-bottom: 12px !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+}
+
+.review-breakdown-header h4 {
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  color: #0b2545 !important;
+  margin: 0 !important;
+}
+
+.currency-tag {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  color: #64748b !important;
+  background: #f1f5f9 !important;
+  padding: 3px 8px !important;
+  border-radius: 6px !important;
+  display: inline-block !important;
+}
+
+.review-table {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+}
+
+.review-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  font-size: 13.5px !important;
+  color: #475569 !important;
+}
+
+.review-row-label {
+  font-weight: 500 !important;
+}
+
+.review-row-val {
+  font-size: 14.5px !important;
+  font-weight: 700 !important;
+  color: #0b2545 !important;
+}
+
+.review-total-divider {
+  height: 1px !important;
+  background: #e2e8f0 !important;
+  margin: 6px 0 !important;
+}
+
+.review-row--total {
+  display: flex !important;
+  align-items: baseline !important;
+  justify-content: space-between !important;
+  padding-top: 6px !important;
+}
+
+.review-total-label {
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  color: #0b2545 !important;
+}
+
+.review-total-hint {
+  font-size: 11.5px !important;
+  font-weight: 500 !important;
+  color: #64748b !important;
+  margin-top: 2px !important;
+}
+
+.review-total-amount {
+  font-size: 22px !important;
+  font-weight: 900 !important;
+  color: #0d5edb !important;
+  letter-spacing: -0.02em !important;
+}
+
+@media (max-width: 640px) {
+  .review-flight-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .review-endpoint--dest {
+    text-align: left !important;
+  }
+
+  .flight-duration-center {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .review-itinerary-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+}

@@ -75,7 +75,7 @@ export function FleetShowcase() {
 
   return (
     <div
-      className="hero-fleet-banner scroll-discover"
+      className="hero-fleet-banner"
       onMouseEnter={() => setIsPlaying(false)}
       onMouseLeave={() => setIsPlaying(true)}
       role="region"

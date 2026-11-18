@@ -22,6 +22,7 @@ import { AddonSelector } from "./addon-selector";
 import { ConfirmationView } from "./confirmation-view";
 import { PaymentGateway } from "./payment-gateway";
 import { SeatMap } from "./seat-map";
+import { getAirportByCode } from "@/features/homepage/data/airports-catalog";
 
 interface BookingWorkflowModalProps {
   flight: FlightOffer | null;
@@ -202,6 +203,13 @@ export function BookingWorkflowModal({
     }
   }
 
+  if (!flight) return null;
+
+  const originAirport = getAirportByCode(flight.origin.code);
+  const destAirport = getAirportByCode(flight.destination.code);
+  const originCity = originAirport?.city || flight.origin.city || flight.origin.code;
+  const destCity = destAirport?.city || flight.destination.city || flight.destination.code;
+
   return (
     <div
       className="auth-overlay booking-workflow-overlay"
@@ -213,14 +221,13 @@ export function BookingWorkflowModal({
         {/* Header */}
         <div className="workflow-header">
           <div className="workflow-header__title-wrap">
-            <span className="eyebrow eyebrow--blue">
-              <Icon name="plane" size={14} />
-              Commercial Airline Reservation
-            </span>
             <h2 id="booking-workflow-title">
-              {flight.origin.code} → {flight.destination.code}
+              {originCity} ({flight.origin.code}) → {destCity} ({flight.destination.code})
               {returnFlight && ` (Roundtrip via ${returnFlight.origin.code})`}
             </h2>
+            <p className="workflow-header__subtitle">
+              {flight.airline.name} • Flight {flight.flight_number} • {flight.depart_on}
+            </p>
           </div>
           <button
             type="button"
@@ -466,8 +473,9 @@ export function BookingWorkflowModal({
                 <h4>Primary Contact &amp; E-Ticket Delivery</h4>
                 <div className="contact-inputs-grid">
                   <div className="form-group">
-                    <label>Email Address</label>
+                    <label htmlFor="contact-email">Email Address</label>
                     <input
+                      id="contact-email"
                       type="email"
                       value={contactEmail}
                       onChange={(e) => setContactEmail(e.target.value)}
@@ -476,8 +484,9 @@ export function BookingWorkflowModal({
                     />
                   </div>
                   <div className="form-group">
-                    <label>Phone Number (with country code)</label>
+                    <label htmlFor="contact-phone">Phone Number (with country code)</label>
                     <input
+                      id="contact-phone"
                       type="tel"
                       value={contactPhone}
                       onChange={(e) => setContactPhone(e.target.value)}
@@ -587,28 +596,73 @@ export function BookingWorkflowModal({
           {/* STEP 5: BOOKING REVIEW & HOLD */}
           {currentStep === "review" && (
             <div className="step-pane step-review">
-              <h3>Review Itinerary &amp; Price Breakdown</h3>
-              <p>Lock in this reservation to hold seats for 10 minutes while you complete payment.</p>
+              <div className="step-review__intro">
+                <h3>Review Flight Itinerary &amp; Price Breakdown</h3>
+                <p>Lock in this reservation to hold seats for 10 minutes while you complete payment.</p>
+              </div>
 
               <div className="review-itinerary-card">
                 <div className="review-itinerary-header">
-                  <span className="airline-badge">{flight.airline.name}</span>
-                  <span className="flight-no">{flight.flight_number}</span>
-                  <span className="aircraft-pill">{flight.aircraft}</span>
+                  <div className="review-itinerary-airline">
+                    <span className="airline-badge">{flight.airline.name}</span>
+                    <span className="flight-no">{flight.flight_number}</span>
+                    <span className="aircraft-pill">{flight.aircraft}</span>
+                  </div>
+                  <span className="review-tier-badge">{fareTier.toUpperCase()} TIER</span>
                 </div>
+
                 <div className="review-flight-row">
-                  <div>
-                    <strong>{flight.origin.city} ({flight.origin.code})</strong>
-                    <span>{flight.depart_on} at {new Date(flight.depart_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                  <div className="review-endpoint review-endpoint--origin">
+                    <div className="review-time">
+                      {new Date(flight.depart_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    </div>
+                    <div className="review-city">{originCity} ({flight.origin.code})</div>
+                    <div className="review-date">{flight.depart_on}</div>
                   </div>
+
                   <div className="flight-duration-center">
-                    <span>{Math.floor(flight.duration_minutes / 60)}h {flight.duration_minutes % 60}m</span>
-                    <div className="duration-line" />
-                    <small>{flight.stops === 0 ? "Non-stop" : `${flight.stops} Stop`}</small>
+                    <span className="flight-duration-text">
+                      {Math.floor(flight.duration_minutes / 60)}h {flight.duration_minutes % 60}m
+                    </span>
+                    <div className="flight-track">
+                      <span className="track-line" />
+                      <Icon name="plane" size={14} className="track-plane" />
+                      <span className="track-line" />
+                    </div>
+                    <span className="flight-stop-badge">
+                      {flight.stops === 0 ? "Non-stop" : `${flight.stops} Stop`}
+                    </span>
                   </div>
-                  <div>
-                    <strong>{flight.destination.city} ({flight.destination.code})</strong>
-                    <span>{new Date(flight.arrive_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+
+                  <div className="review-endpoint review-endpoint--dest">
+                    <div className="review-time">
+                      {new Date(flight.arrive_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    </div>
+                    <div className="review-city">{destCity} ({flight.destination.code})</div>
+                    <div className="review-date">{flight.depart_on}</div>
+                  </div>
+                </div>
+
+                {/* Passenger & Seat Assignment strip */}
+                <div className="review-passenger-summary">
+                  <span className="review-summary-label">Travellers &amp; Assigned Seats:</span>
+                  <div className="review-passenger-chips">
+                    {passengers.map((p, idx) => {
+                      const assignedSeat = selectedSeats.find((s) => s.passenger_index === idx);
+                      return (
+                        <div key={idx} className="review-passenger-chip">
+                          <Icon name="user" size={13} />
+                          <span>
+                            {p.first_name || p.last_name
+                              ? `${p.title} ${p.first_name} ${p.last_name}`.trim()
+                              : `Passenger ${idx + 1}`}
+                          </span>
+                          <span className="review-chip-seat">
+                            Seat: <strong>{assignedSeat?.seat_number || "Auto-assigned"}</strong>
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -616,36 +670,46 @@ export function BookingWorkflowModal({
               {/* Itemized Price Breakdown */}
               {breakdown && (
                 <div className="review-breakdown-card">
-                  <h4>Transparent Fare Breakdown</h4>
+                  <div className="review-breakdown-header">
+                    <h4>Fare Summary</h4>
+                    <span className="currency-tag">All prices in {breakdown.currency}</span>
+                  </div>
                   <div className="review-table">
                     <div className="review-row">
-                      <span>Base Airfare ({passengers.length} Traveller{passengers.length > 1 ? "s" : ""}, {fareTier.toUpperCase()} tier)</span>
-                      <strong>{breakdown.currency === "INR" ? "₹" : "$"}{parseFloat(breakdown.base_fare).toLocaleString()}</strong>
+                      <span className="review-row-label">
+                        Base Airfare ({passengers.length} Traveller{passengers.length > 1 ? "s" : ""}, {fareTier.toUpperCase()})
+                      </span>
+                      <strong className="review-row-val">{breakdown.currency === "INR" ? "₹" : "$"}{parseFloat(breakdown.base_fare).toLocaleString()}</strong>
                     </div>
                     <div className="review-row">
-                      <span>Airport Taxes, User Development Fee &amp; GST</span>
-                      <strong>{breakdown.currency === "INR" ? "₹" : "$"}{parseFloat(breakdown.taxes_and_fees).toLocaleString()}</strong>
+                      <span className="review-row-label">Airport Taxes, UDF &amp; Aviation GST</span>
+                      <strong className="review-row-val">{breakdown.currency === "INR" ? "₹" : "$"}{parseFloat(breakdown.taxes_and_fees).toLocaleString()}</strong>
                     </div>
                     {parseFloat(breakdown.seats_fee) > 0 && (
                       <div className="review-row">
-                        <span>Selected Seats ({selectedSeats.length} Seat{selectedSeats.length > 1 ? "s" : ""})</span>
-                        <strong>{breakdown.currency === "INR" ? "₹" : "$"}{parseFloat(breakdown.seats_fee).toLocaleString()}</strong>
+                        <span className="review-row-label">Selected Seats ({selectedSeats.length} Seat{selectedSeats.length > 1 ? "s" : ""})</span>
+                        <strong className="review-row-val">{breakdown.currency === "INR" ? "₹" : "$"}{parseFloat(breakdown.seats_fee).toLocaleString()}</strong>
                       </div>
                     )}
                     {parseFloat(breakdown.addons_fee) > 0 && (
                       <div className="review-row">
-                        <span>Add-ons ({selectedAddons.length} item{selectedAddons.length > 1 ? "s" : ""})</span>
-                        <strong>{breakdown.currency === "INR" ? "₹" : "$"}{parseFloat(breakdown.addons_fee).toLocaleString()}</strong>
+                        <span className="review-row-label">Add-ons &amp; Baggage ({selectedAddons.length} item{selectedAddons.length > 1 ? "s" : ""})</span>
+                        <strong className="review-row-val">{breakdown.currency === "INR" ? "₹" : "$"}{parseFloat(breakdown.addons_fee).toLocaleString()}</strong>
                       </div>
                     )}
                     <div className="review-row">
-                      <span>Convenience &amp; Platform Processing Fee</span>
-                      <strong>{breakdown.currency === "INR" ? "₹" : "$"}{parseFloat(breakdown.convenience_fee).toLocaleString()}</strong>
+                      <span className="review-row-label">Convenience &amp; Platform Processing Fee</span>
+                      <strong className="review-row-val">{breakdown.currency === "INR" ? "₹" : "$"}{parseFloat(breakdown.convenience_fee).toLocaleString()}</strong>
                     </div>
                     <div className="review-total-divider" />
                     <div className="review-row review-row--total">
-                      <span>Total Guaranteed Payable</span>
-                      <strong>{breakdown.currency === "INR" ? "₹" : "$"}{parseFloat(breakdown.total).toLocaleString()}</strong>
+                      <div>
+                        <div className="review-total-label">Total Guaranteed Payable</div>
+                        <div className="review-total-hint">Includes all taxes, fees &amp; selected extras</div>
+                      </div>
+                      <strong className="review-total-amount">
+                        {breakdown.currency === "INR" ? "₹" : "$"}{parseFloat(breakdown.total).toLocaleString()}
+                      </strong>
                     </div>
                   </div>
                 </div>

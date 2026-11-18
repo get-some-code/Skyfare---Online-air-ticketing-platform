@@ -118,11 +118,14 @@ select:focus-visible {
 }
 
 .site-header {
-  position: relative;
-  z-index: 20;
+  position: sticky;
+  top: 0;
+  z-index: 100;
   border-bottom: 1px solid #e8edf4;
-  background: var(--surface);
-  box-shadow: 0 3px 14px rgb(0 21 42 / 4%);
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 18px rgb(0 21 42 / 5%);
+  transition: background 0.2s ease, box-shadow 0.2s ease;
 }
 
 .site-header__inner {
@@ -966,16 +969,16 @@ select:focus-visible {
 /* ─── Scroll Discovery Effect ─── */
 .scroll-discover {
   opacity: 0;
-  transform: translateY(30px);
+  transform: translateY(20px);
   transition:
-    opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform;
 }
 
 .scroll-discover.is-discovered {
-  opacity: 1;
-  transform: translateY(0);
+  opacity: 1 !important;
+  transform: translateY(0) !important;
 }
 
 .scroll-discover--stagger-1 { transition-delay: 0.05s; }
@@ -6120,7 +6123,7 @@ select:focus-visible {
   padding: 12px 16px;
   border: 1.5px solid #cbd5e1;
   border-radius: 10px;
-  font-size: 15px;
+  font-size: 16px;
   outline: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -7415,7 +7418,48 @@ select:focus-visible {
 .passenger-inputs-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
+  gap: 14px;
+}
+
+.form-group {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  width: 100%;
+}
+
+.form-group label {
+  display: block !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  color: #334155 !important;
+  margin: 0 !important;
+}
+
+.form-group input,
+.form-group select {
+  width: 100% !important;
+  height: 42px !important;
+  padding: 8px 14px !important;
+  border-radius: 8px !important;
+  border: 1.5px solid #cbd5e1 !important;
+  background: #ffffff !important;
+  color: #0f172a !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+  outline: none !important;
+  box-sizing: border-box !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #0d5edb !important;
+  box-shadow: 0 0 0 3px rgba(13, 94, 219, 0.12) !important;
+}
+
+.form-group input::placeholder {
+  color: #94a3b8 !important;
 }
 
 .form-group--small {
@@ -7426,7 +7470,7 @@ select:focus-visible {
   background: #eff6ff;
   border: 1px solid #bfdbfe;
   border-radius: 14px;
-  padding: 20px;
+  padding: 22px;
   margin-bottom: 24px;
 }
 
@@ -7434,7 +7478,7 @@ select:focus-visible {
   font-size: 15px;
   font-weight: 700;
   color: #1e3a8a;
-  margin: 0 0 14px;
+  margin: 0 0 16px;
 }
 
 .contact-inputs-grid {
@@ -7443,19 +7487,50 @@ select:focus-visible {
   gap: 16px;
 }
 
+@media (max-width: 640px) {
+  .contact-inputs-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.contact-details-box .form-group label {
+  color: #1e40af !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+}
+
+.contact-details-box .form-group input {
+  background: #ffffff !important;
+  border: 1.5px solid #bfdbfe !important;
+}
+
+.contact-details-box .form-group input:focus {
+  border-color: #0d5edb !important;
+  box-shadow: 0 0 0 3px rgba(13, 94, 219, 0.15) !important;
+}
+
 .checkbox-group {
   grid-column: 1 / -1;
-  margin-top: 4px;
+  margin-top: 8px;
 }
 
 .checkbox-label {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
+  gap: 10px;
+  font-size: 13.5px;
   font-weight: 500;
   color: #1e3a8a;
   cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px !important;
+  height: 18px !important;
+  accent-color: #0d5edb;
+  cursor: pointer;
+  margin: 0 !important;
 }
 
 /* Workflow Action Buttons */
@@ -8720,4 +8795,351 @@ select:focus-visible {
   background: #ecfdf5;
   padding: 2px 6px;
   border-radius: 4px;
+}
+
+/* ==========================================================================
+   BOOKING WORKFLOW - REVIEW & HOLD STEP (STEP 5)
+   ========================================================================== */
+
+.workflow-header__subtitle {
+  font-size: 13px;
+  color: #64748b;
+  margin: 4px 0 0;
+  font-weight: 500;
+}
+
+.step-review {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.step-review__intro h3 {
+  font-size: 19px;
+  font-weight: 800;
+  color: #0b2545;
+  margin: 0 0 4px;
+}
+
+.step-review__intro p {
+  font-size: 13.5px;
+  color: #64748b;
+  margin: 0;
+}
+
+.review-itinerary-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.review-itinerary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.review-itinerary-airline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.airline-badge {
+  background: #0d5edb;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  letter-spacing: 0.02em;
+}
+
+.flight-no {
+  font-weight: 700;
+  font-size: 13px;
+  color: #0b2545;
+  background: #e2e8f0;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.aircraft-pill {
+  font-size: 12px;
+  color: #64748b;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.review-tier-badge {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.review-flight-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 6px 0;
+}
+
+.review-endpoint {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.review-endpoint--origin {
+  text-align: left;
+}
+
+.review-endpoint--dest {
+  text-align: right;
+}
+
+.review-time {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0b2545;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.review-city {
+  font-size: 14px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.review-date {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.flight-duration-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex: 1;
+  max-width: 200px;
+  margin: 0 auto;
+}
+
+.flight-duration-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.flight-track {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.track-line {
+  flex: 1;
+  height: 2px;
+  background: #cbd5e1;
+  position: relative;
+}
+
+.track-plane {
+  color: #0d5edb;
+  transform: rotate(90deg);
+  flex-shrink: 0;
+}
+
+.flight-stop-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: #059669;
+  background: #ecfdf5;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.review-passenger-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.review-summary-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+}
+
+.review-passenger-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.review-passenger-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #1e293b;
+}
+
+.review-passenger-chip svg {
+  color: #0d5edb;
+}
+
+.review-chip-seat {
+  font-size: 12px;
+  color: #64748b;
+  padding-left: 6px;
+  border-left: 1px solid #e2e8f0;
+}
+
+.review-chip-seat strong {
+  color: #0d5edb;
+  font-weight: 700;
+}
+
+/* Fare Breakdown Card */
+.review-breakdown-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 22px 24px;
+  box-shadow: 0 4px 16px rgba(11, 37, 69, 0.04);
+}
+
+.review-breakdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.review-breakdown-header h4 {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0b2545;
+  margin: 0;
+}
+
+.currency-tag {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.review-table {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.review-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13.5px;
+  color: #475569;
+}
+
+.review-row-label {
+  font-weight: 500;
+}
+
+.review-row-val {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #0b2545;
+}
+
+.review-total-divider {
+  height: 1px;
+  background: #e2e8f0;
+  margin: 6px 0;
+}
+
+.review-row--total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-top: 6px;
+}
+
+.review-total-label {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0b2545;
+}
+
+.review-total-hint {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.review-total-amount {
+  font-size: 22px;
+  font-weight: 900;
+  color: #0d5edb;
+  letter-spacing: -0.02em;
+}
+
+@media (max-width: 640px) {
+  .review-flight-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .review-endpoint--dest {
+    text-align: left;
+  }
+
+  .flight-duration-center {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .review-itinerary-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Icon } from "@/components/ui/icon";
 import type { TripState } from "@/lib/api/planner";
 
@@ -31,11 +31,6 @@ export function PlannerConversation({
 }: PlannerConversationProps) {
   const [inputText, setInputText] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [question, chips, isReadyToGenerate]);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -156,8 +151,6 @@ export function PlannerConversation({
             </button>
           </div>
         )}
-
-        <div ref={bottomRef} />
       </div>
 
       {/* Free-text Input Bar */}

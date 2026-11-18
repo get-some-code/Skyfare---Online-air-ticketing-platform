@@ -29,13 +29,21 @@ export function HomePage() {
         });
       },
       {
-        threshold: 0.1,
-        rootMargin: "0px 0px -30px 0px",
+        threshold: 0.05,
+        rootMargin: "0px 0px 80px 0px",
       },
     );
 
     const elements = document.querySelectorAll(".scroll-discover");
-    elements.forEach((el) => observer.observe(el));
+    elements.forEach((el) => {
+      // If already in or near viewport, mark discovered immediately
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight + 100) {
+        el.classList.add("is-discovered");
+      } else {
+        observer.observe(el);
+      }
+    });
 
     return () => observer.disconnect();
   }, []);
@@ -94,7 +102,7 @@ export function HomePage() {
         {/* Dynamic Fleet & Luxury Interior Showcase Slideshow */}
         <FleetShowcase />
 
-        <div id="search" className="search-anchor scroll-discover">
+        <div id="search" className="search-anchor">
           <FlightSearchForm
             selectedDestination={selectedDestination}
             onDestinationChange={(value) => {
