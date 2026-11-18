@@ -692,7 +692,7 @@ export function FlightSearchForm({
                     </select>
                   </label>
                   <button
-                    className="button button--secondary button--full"
+                    className="traveller-popover__done-btn"
                     type="button"
                     onClick={() => setTravellerPickerOpen(false)}
                   >

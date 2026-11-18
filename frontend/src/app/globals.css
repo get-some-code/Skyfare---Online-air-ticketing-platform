@@ -395,7 +395,8 @@ select:focus-visible {
 
 .hero-section {
   position: relative;
-  overflow: hidden;
+  overflow: visible;
+  z-index: 20;
   padding: 36px max(28px, calc((100% - var(--content-width)) / 2)) 44px;
   background:
     radial-gradient(ellipse at 50% 30%, rgb(255 255 255 / 54%), transparent 58%),
@@ -432,10 +433,14 @@ select:focus-visible {
   transform: rotate(-32deg);
 }
 
-.hero-section__intro,
-.search-anchor {
+.hero-section__intro {
   position: relative;
   z-index: 1;
+}
+
+.search-anchor {
+  position: relative;
+  z-index: 30;
 }
 
 .hero-section__intro {
@@ -989,6 +994,8 @@ select:focus-visible {
 .scroll-discover--stagger-6 { transition-delay: 0.30s; }
 
 .flight-search {
+  position: relative;
+  z-index: 35;
   overflow: visible;
   border-radius: 18px;
   background: var(--surface);
@@ -1284,87 +1291,147 @@ select:focus-visible {
   font-size: 13px;
 }
 
+.traveller-field {
+  position: relative;
+}
+
 .traveller-popover {
   position: absolute;
-  z-index: 10;
+  z-index: 250 !important;
   top: calc(100% + 10px);
   right: 0;
-  width: min(300px, calc(100vw - 48px));
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: white;
-  padding: 18px;
-  box-shadow: var(--shadow-card);
+  width: 330px;
+  max-width: calc(100vw - 32px);
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background: #ffffff;
+  padding: 22px;
+  box-shadow: 0 25px 60px -12px rgba(11, 37, 69, 0.25), 0 0 0 1px rgba(13, 94, 219, 0.1);
+  animation: popoverFadeIn 0.16s ease-out;
 }
 
 .traveller-popover__row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
-  padding-bottom: 16px;
+  gap: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 14px;
 }
 
 .traveller-popover__row > div:first-child {
-  display: grid;
-  gap: 3px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .traveller-popover__row strong {
-  font-size: 14px;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #0b2545;
 }
 
 .traveller-popover__row span {
-  color: var(--muted);
+  color: #64748b;
   font-size: 12px;
 }
 
 .stepper {
   display: flex;
   align-items: center;
-  gap: 13px;
+  gap: 12px;
 }
 
 .stepper button {
-  display: grid;
-  width: 32px;
-  height: 32px;
-  place-items: center;
-  border: 1px solid var(--line);
-  border-radius: 9px;
-  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  background: #ffffff;
   cursor: pointer;
-  font-size: 19px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #0b2545;
+  transition: all 0.15s ease;
+}
+
+.stepper button:hover:not(:disabled) {
+  border-color: #0d5edb;
+  color: #0d5edb;
+  background: #eff6ff;
+  transform: scale(1.05);
 }
 
 .stepper button:disabled {
-  color: #a4acb5;
+  color: #cbd5e1;
+  border-color: #e2e8f0;
+  background: #f8fafc;
   cursor: not-allowed;
+  transform: none;
 }
 
 .stepper output {
-  min-width: 16px;
+  min-width: 20px;
   text-align: center;
+  font-size: 16px;
+  font-weight: 800;
+  color: #0b2545;
 }
 
 .traveller-popover__cabin {
-  display: grid;
-  gap: 7px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 14px;
   margin-bottom: 16px;
-  color: var(--muted);
-  font-size: 12px;
+  color: #475569;
+  font-size: 12.5px;
   font-weight: 700;
 }
 
 .traveller-popover__cabin select {
   width: 100%;
-  min-height: 40px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: white;
-  padding: 0 10px;
-  color: var(--ink);
+  height: 42px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 0 12px;
+  color: #0b2545;
   font-size: 14px;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.traveller-popover__cabin select:focus {
+  border-color: #0d5edb;
+  box-shadow: 0 0 0 3px rgba(13, 94, 219, 0.12);
+}
+
+.traveller-popover__done-btn {
+  width: 100%;
+  height: 42px;
+  border-radius: 10px;
+  background: #0d5edb;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.traveller-popover__done-btn:hover {
+  background: #0b4ec2;
+  transform: translateY(-1px);
 }
 
 .flight-search__multi-note {
