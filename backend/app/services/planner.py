@@ -466,6 +466,7 @@ Ensure exactly {days_count} day objects are generated in the "days" array.
     # Clean and validate IATA codes against existing catalog
     _sanitize_flight_search(raw_data, origin, dest, days_count)
     _sanitize_budget(raw_data)
+    _sanitize_days(raw_data, dest, days_count)
 
     # Validate against Pydantic schema
     try:
@@ -542,4 +543,50 @@ def _sanitize_budget(raw_data: dict[str, Any]) -> None:
             return f"{prefix}{int(num_str):,}"
         formatted_flights = re.sub(r"(₹|\b)(\d{4,7})\b", comma_repl, flights_val)
         budget["approx_flights_inr"] = formatted_flights
+
+
+def _sanitize_days(raw_data: dict[str, Any], dest: str, days_count: int) -> None:
+    import re
+    days = raw_data.get("days", [])
+    if not isinstance(days, list) or len(days) == 0:
+        return
+
+    curated_manali_extras = [
+        ("Arrival, Acclimatisation & Old Manali Heritage Walk", "Hadimba Temple and Old Manali riverside village"),
+        ("Atal Tunnel Marvel & Lahaul Valley Sissu Waterfalls", "Trans-Himalayan drive through Atal Tunnel to glacial waterfall"),
+        ("Solang Valley Alpine Adventures & Paragliding", "High altitude meadows, zorbing, and cable car ride"),
+        ("Jogini Waterfall Trek & Vashisht Natural Sulphur Springs", "Scenic forest trek through pine orchards and thermal bath"),
+        ("Naggar Historic Castle & Nicholas Roerich Art Gallery", "15th century stone and timber castle overlooking Beas River"),
+        ("Gulaba & Marhi High Altitude Alpine Meadows", "Snow viewpoints on the Rohtang highway corridor"),
+        ("Jana Traditional Heritage Village & Himachali Dham", "Ancient deodar forest trail and authentic Himachali feast"),
+        ("Kasol & Manikaran Hot Springs Excursion", "Parvati Valley riverside cafes and spiritual gurudwara"),
+        ("Sethan Buddhist Hamlets & Hampta Foothills", "Secluded horse trails and Pir Panjal mountain panoramas"),
+        ("Tirthan Valley & Great Himalayan National Park", "UNESCO nature reserve, trout streams, and serene riverwalks"),
+    ]
+
+    seen_titles: set[str] = set()
+    cleaned_days: list[dict[str, Any]] = []
+
+    for idx, day in enumerate(days):
+        if not isinstance(day, dict):
+            continue
+        day_num = idx + 1
+        day["day"] = day_num
+        raw_title = str(day.get("title", "")).strip()
+        # Remove any repeating "(Day X)" artifact
+        clean_title = re.sub(r"\s*\(Day\s*\d+\)$", "", raw_title, flags=re.I).strip()
+
+        # If duplicate or empty, replace with curated unique title
+        if clean_title.lower() in seen_titles or not clean_title:
+            if "manali" in dest.lower() and idx < len(curated_manali_extras):
+                clean_title = curated_manali_extras[idx][0]
+            else:
+                clean_title = f"{dest} Discovery, Scenic Vistas & Regional Delights (Day {day_num})"
+
+        seen_titles.add(clean_title.lower())
+        day["title"] = clean_title
+        cleaned_days.append(day)
+
+    raw_data["days"] = cleaned_days
+
 

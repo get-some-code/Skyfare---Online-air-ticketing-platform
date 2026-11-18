@@ -42,7 +42,10 @@ export function FlightSearchForm({
   const [departureDate, setDepartureDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
   const [via, setVia] = useState("");
-  const [travellers, setTravellers] = useState(1);
+  const [adults, setAdults] = useState(1);
+  const [children, setChildren] = useState(0);
+  const [infants, setInfants] = useState(0);
+  const travellers = adults + children + infants;
   const [cabin, setCabin] = useState("Business / Flexi");
   const [directOnly, setDirectOnly] = useState(true);
   const [flexibleDates, setFlexibleDates] = useState(true);
@@ -576,7 +579,9 @@ export function FlightSearchForm({
               >
                 <span className="search-field__label">Travellers &amp; class</span>
                 <span className="traveller-field__value">
-                  {travellers} {travellers === 1 ? "Adult" : "Adults"}
+                  {adults} Adult{adults > 1 ? "s" : ""}
+                  {children > 0 ? `, ${children} Child${children > 1 ? "ren" : ""}` : ""}
+                  {infants > 0 ? `, ${infants} Infant${infants > 1 ? "s" : ""}` : ""}
                 </span>
                 <span className="traveller-field__cabin">{cabin}</span>
               </button>
@@ -587,6 +592,7 @@ export function FlightSearchForm({
                   role="dialog"
                   aria-label="Choose travellers and cabin class"
                 >
+                  {/* Adults */}
                   <div className="traveller-popover__row">
                     <div>
                       <strong>Adults</strong>
@@ -596,26 +602,83 @@ export function FlightSearchForm({
                       <button
                         type="button"
                         aria-label="Remove one adult"
-                        disabled={travellers <= 1}
-                        onClick={() =>
-                          setTravellers((count) => Math.max(1, count - 1))
-                        }
+                        disabled={adults <= 1 || (adults <= infants)}
+                        onClick={() => setAdults((c) => Math.max(1, c - 1))}
                       >
                         −
                       </button>
-                      <output aria-live="polite">{travellers}</output>
+                      <output aria-live="polite">{adults}</output>
                       <button
                         type="button"
                         aria-label="Add one adult"
                         disabled={travellers >= 9}
-                        onClick={() =>
-                          setTravellers((count) => Math.min(9, count + 1))
-                        }
+                        onClick={() => setAdults((c) => Math.min(9, c + 1))}
                       >
                         +
                       </button>
                     </div>
                   </div>
+
+                  {/* Children */}
+                  <div className="traveller-popover__row">
+                    <div>
+                      <strong>Children</strong>
+                      <span>Age 2 – 11</span>
+                    </div>
+                    <div className="stepper">
+                      <button
+                        type="button"
+                        aria-label="Remove one child"
+                        disabled={children <= 0}
+                        onClick={() => setChildren((c) => Math.max(0, c - 1))}
+                      >
+                        −
+                      </button>
+                      <output aria-live="polite">{children}</output>
+                      <button
+                        type="button"
+                        aria-label="Add one child"
+                        disabled={travellers >= 9}
+                        onClick={() => setChildren((c) => Math.min(9, c + 1))}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Infants */}
+                  <div className="traveller-popover__row">
+                    <div>
+                      <strong>Infants</strong>
+                      <span>Under 2 (on lap)</span>
+                    </div>
+                    <div className="stepper">
+                      <button
+                        type="button"
+                        aria-label="Remove one infant"
+                        disabled={infants <= 0}
+                        onClick={() => setInfants((c) => Math.max(0, c - 1))}
+                      >
+                        −
+                      </button>
+                      <output aria-live="polite">{infants}</output>
+                      <button
+                        type="button"
+                        aria-label="Add one infant"
+                        disabled={infants >= adults || travellers >= 9}
+                        onClick={() => setInfants((c) => Math.min(adults, c + 1))}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+
+                  {infants >= adults && (
+                    <small style={{ color: "#d97706", fontSize: "11px", display: "block", marginBottom: "8px" }}>
+                      Each infant must be accompanied by at least 1 adult passenger.
+                    </small>
+                  )}
+
                   <label className="traveller-popover__cabin">
                     Cabin class
                     <select

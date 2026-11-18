@@ -89,12 +89,37 @@ function LoginForm() {
           </p>
         </div>
 
-        <div className="auth-modal__tabs auth-tabs" role="tablist">
+        <div
+          className="auth-modal__tabs auth-tabs"
+          role="tablist"
+          style={{
+            display: "flex",
+            width: "100%",
+            borderBottom: "2px solid #e2e8f0",
+            marginTop: "18px",
+            marginBottom: "24px",
+            gap: "8px",
+          }}
+        >
           <button
             type="button"
             role="tab"
             aria-selected={tab === "login"}
             className={`auth-tab ${tab === "login" ? "is-active" : ""}`}
+            style={{
+              flex: "1 1 0%",
+              padding: "11px 16px",
+              textAlign: "center",
+              fontWeight: tab === "login" ? 700 : 600,
+              fontSize: "14.5px",
+              color: tab === "login" ? "#0d5edb" : "#64748b",
+              background: "transparent",
+              border: "none",
+              borderBottom: tab === "login" ? "2.5px solid #0d5edb" : "2.5px solid transparent",
+              marginBottom: "-2px",
+              cursor: "pointer",
+              transition: "all 0.15s ease",
+            }}
             onClick={() => {
               setTab("login");
               setError(null);
@@ -107,6 +132,20 @@ function LoginForm() {
             role="tab"
             aria-selected={tab === "register"}
             className={`auth-tab ${tab === "register" ? "is-active" : ""}`}
+            style={{
+              flex: "1 1 0%",
+              padding: "11px 16px",
+              textAlign: "center",
+              fontWeight: tab === "register" ? 700 : 600,
+              fontSize: "14.5px",
+              color: tab === "register" ? "#0d5edb" : "#64748b",
+              background: "transparent",
+              border: "none",
+              borderBottom: tab === "register" ? "2.5px solid #0d5edb" : "2.5px solid transparent",
+              marginBottom: "-2px",
+              cursor: "pointer",
+              transition: "all 0.15s ease",
+            }}
             onClick={() => {
               setTab("register");
               setError(null);

@@ -426,9 +426,14 @@ function SearchResultsContent() {
                     </div>
 
                     <div className="flight-card__price-block">
-                      <span className="flight-card__cabin-tag">
-                        {flight.cabin.replace("_", " ").toUpperCase()}
-                      </span>
+                      <div className="flight-card__badges-row">
+                        <span className="flight-card__cabin-tag">
+                          {flight.cabin.replace("_", " ").toUpperCase()}
+                        </span>
+                        <span className="flight-card__baggage-tag">
+                          <Icon name="luggage" size={12} /> 15 kg checked
+                        </span>
+                      </div>
                       <strong className="flight-card__amount">
                         {flight.price.currency === "INR" ? "₹" : "$"}
                         {Number(flight.price.total).toLocaleString()}
@@ -474,6 +479,12 @@ function SearchResultsContent() {
       {/* Flight Reservation Modal */}
       <BookingModal
         flight={selectedFlight}
+        returnFlight={
+          tripType === "round-trip" && data?.inbound && data.inbound[0]
+            ? data.inbound[0]
+            : null
+        }
+        travellersCount={travellers}
         onClose={() => setSelectedFlight(null)}
       />
     </>

@@ -105,12 +105,37 @@ export function AuthModal() {
               : "Unlock executive fares, automated corporate GST invoices, and lounge perks."}
           </p>
 
-          <div className="auth-modal__tabs" role="tablist">
+          <div
+            className="auth-modal__tabs"
+            role="tablist"
+            style={{
+              display: "flex",
+              width: "100%",
+              borderBottom: "2px solid #eef3f9",
+              marginTop: "18px",
+              marginBottom: "24px",
+              gap: "8px",
+            }}
+          >
             <button
               type="button"
               role="tab"
               aria-selected={tab === "login"}
               className={`auth-tab${tab === "login" ? " is-active" : ""}`}
+              style={{
+                flex: "1 1 0%",
+                padding: "11px 16px",
+                textAlign: "center",
+                fontWeight: tab === "login" ? 700 : 600,
+                fontSize: "14.5px",
+                color: tab === "login" ? "#0454d5" : "#5d7081",
+                background: "transparent",
+                border: "none",
+                borderBottom: tab === "login" ? "2.5px solid #0454d5" : "2.5px solid transparent",
+                marginBottom: "-2px",
+                cursor: "pointer",
+                transition: "all 0.15s ease",
+              }}
               onClick={() => {
                 setOverrideTab("login");
                 setError(null);
@@ -123,6 +148,20 @@ export function AuthModal() {
               role="tab"
               aria-selected={tab === "register"}
               className={`auth-tab${tab === "register" ? " is-active" : ""}`}
+              style={{
+                flex: "1 1 0%",
+                padding: "11px 16px",
+                textAlign: "center",
+                fontWeight: tab === "register" ? 700 : 600,
+                fontSize: "14.5px",
+                color: tab === "register" ? "#0454d5" : "#5d7081",
+                background: "transparent",
+                border: "none",
+                borderBottom: tab === "register" ? "2.5px solid #0454d5" : "2.5px solid transparent",
+                marginBottom: "-2px",
+                cursor: "pointer",
+                transition: "all 0.15s ease",
+              }}
               onClick={() => {
                 setOverrideTab("register");
                 setError(null);
